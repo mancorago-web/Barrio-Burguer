@@ -47,56 +47,56 @@ export default function Menu() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-orange-600 text-white p-4 shadow-lg">
+      <header className="bg-orange-600 text-white p-3 md:p-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-center">
-            Sistema de Gestión - Barrio Burguer
+          <h1 className="text-lg md:text-2xl font-bold text-center">
+            🍔 Barrio Burguer
           </h1>
           <button 
             onClick={cerrarSesion}
-            className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+            className="bg-red-500 px-3 py-2 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base"
           >
-            Cerrar Sesión
+            Salir
           </button>
         </div>
       </header>
 
-      <div className="container mx-auto p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="container mx-auto p-3 md:p-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
           <Link href="/inventario" className="block">
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-blue-500">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">📦 Inventario</h2>
-              <p className="text-gray-600">Control de stock, recetas y consumo automático</p>
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-blue-500">
+              <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">📦 Inventario</h2>
+              <p className="text-gray-600 text-sm">Control de stock, recetas y consumo</p>
             </div>
           </Link>
 
           <Link href="/caja" className="block">
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-green-500">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">💰 Caja Chica</h2>
-              <p className="text-gray-600">Gestión de efectivo diario y gastos</p>
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-green-500">
+              <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">💰 Caja Chica</h2>
+              <p className="text-gray-600 text-sm">Gestión de efectivo y gastos</p>
             </div>
           </Link>
 
           <Link href="/ventas" className="block">
-            <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-purple-500">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">🛒 Ventas</h2>
-              <p className="text-gray-600">Ventas en salón y delivery</p>
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-purple-500">
+              <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">🛒 Ventas</h2>
+              <p className="text-gray-600 text-sm">Salón y delivery</p>
             </div>
           </Link>
 
           {(rol === "admin" || rol === "jefe") && (
             <>
               <Link href="/facturas" className="block">
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-yellow-500">
-                  <h2 className="text-xl font-bold text-gray-800 mb-2">🧾 Facturas</h2>
-                  <p className="text-gray-600">Gestión de facturas y comprobantes</p>
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-yellow-500">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">🧾 Facturas</h2>
+                  <p className="text-gray-600 text-sm">Facturas y comprobantes</p>
                 </div>
               </Link>
 
               <Link href="/planillas" className="block">
-                <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-teal-500">
-                  <h2 className="text-xl font-bold text-gray-800 mb-2">📋 Planillas</h2>
-                  <p className="text-gray-600">Control de planillas y colaboradores</p>
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-teal-500">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">📋 Planillas</h2>
+                  <p className="text-gray-600 text-sm">Control de colaboradores</p>
                 </div>
               </Link>
             </>
@@ -104,9 +104,9 @@ export default function Menu() {
 
           {rol === "admin" && (
             <Link href="/gestion-usuarios" className="block">
-              <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-red-500">
-                <h2 className="text-xl font-bold text-gray-800 mb-2">👥 Usuarios</h2>
-                <p className="text-gray-600">Gestión de usuarios y permisos</p>
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-red-500">
+                <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">👥 Usuarios</h2>
+                <p className="text-gray-600 text-sm">Gestión de usuarios</p>
               </div>
             </Link>
           )}

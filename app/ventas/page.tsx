@@ -469,7 +469,7 @@ export default function Ventas() {
                         setMesaSeleccionada(mesa);
                         setPedido(pedidosMesas[mesa] || []);
                       }}
-                      className={`px-4 py-2 rounded ${mesaSeleccionada === mesa ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+                      className={`px-3 py-2 rounded text-sm ${mesaSeleccionada === mesa ? "bg-purple-600 text-white" : "bg-gray-200"}`}
                     >
                       {mesa}
                     </button>
@@ -491,28 +491,28 @@ export default function Ventas() {
                   </button>
                 </div>
 
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
                   {categorias.map(cat => (
                     <button
                       key={cat}
                       onClick={() => setCategoriaSeleccionada(cat)}
-                      className={`px-4 py-2 rounded ${categoriaSeleccionada === cat ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+                      className={`px-3 py-2 rounded text-sm whitespace-nowrap ${categoriaSeleccionada === cat ? "bg-purple-600 text-white" : "bg-gray-200"}`}
                     >
                       {getCategoriaNombre(cat)}
                     </button>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4">
                   {productos
                     .filter(p => p.categoria === categoriaSeleccionada)
                     .map(producto => (
                       <button
                         key={producto.id}
                         onClick={() => agregarAlPedido(producto)}
-                        className="border-2 border-gray-200 rounded-lg p-4 hover:border-purple-500 hover:bg-purple-50 transition"
+                        className="border-2 border-gray-200 rounded-lg p-3 hover:border-purple-500 hover:bg-purple-50 transition text-left"
                       >
-                        <p className="font-bold text-gray-800">{producto.nombre}</p>
+                        <p className="font-bold text-gray-800 text-sm">{producto.nombre}</p>
                         <p className="text-purple-600 font-bold">S/.{producto.precio.toFixed(2)}</p>
                       </button>
                     ))}
@@ -550,22 +550,22 @@ export default function Ventas() {
                       <span className="font-bold text-lg">Total:</span>
                       <span className="font-bold text-xl text-purple-700">S/.{getTotal().toFixed(2)}</span>
                     </div>
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
                       <button 
                         onClick={() => { setPedido([]); setTomarPedido(false); }}
-                        className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
+                        className="sm:flex-1 bg-gray-300 text-gray-700 py-3 rounded hover:bg-gray-400"
                       >
                         Cancelar
                       </button>
                       <button 
                         onClick={registrarMesa}
-                        className="flex-1 bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
+                        className="sm:flex-1 bg-orange-500 text-white py-3 rounded hover:bg-orange-600"
                       >
                         Registrar Mesa
                       </button>
                       <button 
                         onClick={() => setModalPago(true)}
-                        className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                        className="sm:flex-1 bg-green-600 text-white py-3 rounded hover:bg-green-700"
                       >
                         Siguiente
                       </button>

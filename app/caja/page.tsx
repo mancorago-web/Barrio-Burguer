@@ -987,16 +987,14 @@ export default function Caja() {
                           <p className="text-gray-500">No hay compras en esta fecha.</p>
                         ) : (
                           <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
+                            <table className="w-full text-xs md:text-sm">
                               <thead>
                                 <tr className="bg-gray-200">
                                   <th className="p-2 text-left">Producto</th>
-                                  <th className="p-2 text-right">Cantidad</th>
-                                  <th className="p-2 text-right">Costo Unit.</th>
+                                  <th className="p-2 text-right">Cant.</th>
+                                  <th className="p-2 text-right hidden sm:table-cell">Unit.</th>
                                   <th className="p-2 text-right">Total</th>
-                                  <th className="p-2 text-left">Fecha</th>
-                                  <th className="p-2 text-left">Hora</th>
-                                  <th className="p-2 text-left">Usuario</th>
+                                  <th className="p-2 text-left hidden md:table-cell">Hora</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -1004,20 +1002,9 @@ export default function Caja() {
                                   <tr key={idx} className="border-b">
                                     <td className="p-2">{c.producto || "-"}</td>
                                     <td className="p-2 text-right">{c.cantidad || 0}</td>
-                                    <td className="p-2 text-right">S/.{(c.precioUnitario || 0).toFixed(2)}</td>
+                                    <td className="p-2 text-right hidden sm:table-cell">S/.{(c.precioUnitario || 0).toFixed(2)}</td>
                                     <td className="p-2 text-right font-bold">S/.{(c.total || 0).toFixed(2)}</td>
-                                    <td className="p-2">{c.fecha || "-"}</td>
-                                    <td className="p-2">{c.hora || "-"}</td>
-                                    <td className="p-2">
-                                      <span className={`px-2 py-1 rounded text-white text-xs ${
-                                        c.usuario?.toLowerCase() === "admin" ? "bg-purple-600" : 
-                                        c.usuario?.toLowerCase() === "cubas" ? "bg-orange-500" : 
-                                        c.usuario?.toLowerCase() === "cocina1" ? "bg-blue-600" : 
-                                        "bg-gray-500"
-                                      }`}>
-                                        {c.usuario || "-"}
-                                      </span>
-                                    </td>
+                                    <td className="p-2 hidden md:table-cell">{c.hora || "-"}</td>
                                   </tr>
                                 ))}
                               </tbody>
