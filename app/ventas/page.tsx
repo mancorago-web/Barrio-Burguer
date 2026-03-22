@@ -411,39 +411,39 @@ export default function Ventas() {
       </header>
       
       <div className="container mx-auto p-4">
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
           <button 
             onClick={() => setVista("salon")} 
-            className={`px-4 py-2 rounded ${vista === "salon" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "salon" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
           >
             🏠 Salón
           </button>
           <button 
             onClick={() => setVista("delivery")} 
-            className={`px-4 py-2 rounded ${vista === "delivery" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "delivery" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
           >
             🛵 Delivery
           </button>
           <button 
             onClick={() => setVista("registro")} 
-            className={`px-4 py-2 rounded ${vista === "registro" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "registro" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
           >
-            📊 Registro de Ventas
+            📊 Registro
           </button>
         </div>
 
         {vista === "salon" && (
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">🏠 Ventas en Salón</h2>
+          <div className="bg-white rounded-lg shadow p-3 md:p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+              <h2 className="text-base md:text-lg font-bold">🏠 Ventas en Salón</h2>
               {!tomarPedido && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <button 
                     onClick={() => {
                       setPedido(pedidosMesas[mesaSeleccionada] || []);
                       setTomarPedido(true);
                     }}
-                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                    className="flex-1 sm:flex-none bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700"
                   >
                     🍔 Tomar Pedido
                   </button>
@@ -451,9 +451,9 @@ export default function Ventas() {
                     onClick={() => {
                       cargarPedidosAbiertos();
                     }}
-                    className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                    className="flex-1 sm:flex-none bg-orange-500 text-white px-3 py-2 rounded text-sm hover:bg-orange-600"
                   >
-                    📋 Registro de Mesas ({pedidosAbiertos.length})
+                    📋 ({pedidosAbiertos.length})
                   </button>
                 </div>
               )}
@@ -496,7 +496,7 @@ export default function Ventas() {
                     <button
                       key={cat}
                       onClick={() => setCategoriaSeleccionada(cat)}
-                      className={`px-3 py-2 rounded text-sm whitespace-nowrap ${categoriaSeleccionada === cat ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+                      className={`px-3 py-1.5 rounded text-xs md:text-sm whitespace-nowrap ${categoriaSeleccionada === cat ? "bg-purple-600 text-white" : "bg-gray-200"}`}
                     >
                       {getCategoriaNombre(cat)}
                     </button>
@@ -510,34 +510,32 @@ export default function Ventas() {
                       <button
                         key={producto.id}
                         onClick={() => agregarAlPedido(producto)}
-                        className="border-2 border-gray-200 rounded-lg p-3 hover:border-purple-500 hover:bg-purple-50 transition text-left"
+                        className="border border-gray-200 rounded-lg p-2 md:p-3 hover:border-purple-500 hover:bg-purple-50 transition text-left"
                       >
-                        <p className="font-bold text-gray-800 text-sm">{producto.nombre}</p>
-                        <p className="text-purple-600 font-bold">S/.{producto.precio.toFixed(2)}</p>
+                        <p className="font-medium text-gray-800 text-xs md:text-sm truncate">{producto.nombre}</p>
+                        <p className="text-purple-600 font-bold text-sm md:text-base">S/.{producto.precio.toFixed(2)}</p>
                       </button>
                     ))}
                 </div>
 
                 {pedido.length > 0 && (
-                  <div className="border-t pt-4 mt-4">
-                    <h3 className="font-bold mb-2">📝 Pedido - {mesaSeleccionada}:</h3>
-                    <div className="space-y-2 mb-4">
+                  <div className="border-t pt-3 md:pt-4 mt-3 md:mt-4">
+                    <h3 className="font-bold text-sm md:text-base mb-2">📝 Pedido - {mesaSeleccionada}:</h3>
+                    <div className="space-y-1 md:space-y-2 mb-3 md:mb-4">
                       {pedido.map((item, index) => (
-                        <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
-                          <div className="flex items-center gap-2">
-                            <span>{item.producto.nombre}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
+                        <div key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                          <span className="truncate flex-1 mr-2">{item.producto.nombre}</span>
+                          <div className="flex items-center gap-1">
                             <button 
                               onClick={() => eliminarDelPedido(item.producto.id)}
-                              className="text-red-500 font-bold"
+                              className="w-6 h-6 bg-red-100 text-red-600 rounded font-bold text-xs hover:bg-red-200"
                             >
                               -
                             </button>
-                            <span className="font-bold">{item.cantidad}</span>
+                            <span className="font-bold w-6 text-center">{item.cantidad}</span>
                             <button 
                               onClick={() => agregarAlPedido(item.producto)}
-                              className="text-green-500 font-bold"
+                              className="w-6 h-6 bg-green-100 text-green-600 rounded font-bold text-xs hover:bg-green-200"
                             >
                               +
                             </button>
@@ -546,28 +544,28 @@ export default function Ventas() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex justify-between items-center bg-purple-100 p-4 rounded">
-                      <span className="font-bold text-lg">Total:</span>
-                      <span className="font-bold text-xl text-purple-700">S/.{getTotal().toFixed(2)}</span>
+                    <div className="flex justify-between items-center bg-purple-100 p-3 rounded">
+                      <span className="font-bold text-base">Total:</span>
+                      <span className="font-bold text-lg text-purple-700">S/.{getTotal().toFixed(2)}</span>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                    <div className="grid grid-cols-3 gap-2 mt-3">
                       <button 
                         onClick={() => { setPedido([]); setTomarPedido(false); }}
-                        className="sm:flex-1 bg-gray-300 text-gray-700 py-3 rounded hover:bg-gray-400"
+                        className="bg-gray-300 text-gray-700 py-2 rounded text-sm hover:bg-gray-400"
                       >
                         Cancelar
                       </button>
                       <button 
                         onClick={registrarMesa}
-                        className="sm:flex-1 bg-orange-500 text-white py-3 rounded hover:bg-orange-600"
+                        className="bg-orange-500 text-white py-2 rounded text-sm hover:bg-orange-600"
                       >
-                        Registrar Mesa
+                        Registrar
                       </button>
                       <button 
                         onClick={() => setModalPago(true)}
-                        className="sm:flex-1 bg-green-600 text-white py-3 rounded hover:bg-green-700"
+                        className="bg-green-600 text-white py-2 rounded text-sm hover:bg-green-700"
                       >
-                        Siguiente
+                        Cobrar
                       </button>
                     </div>
                   </div>
@@ -577,13 +575,13 @@ export default function Ventas() {
 
             {!tomarPedido && pedidosAbiertos.length > 0 && (
               <div className="mt-4">
-                <h3 className="font-bold mb-2">📋 Mesas Abiertas ({pedidosAbiertos.length})</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                <h3 className="font-bold text-sm md:text-base mb-2">📋 Mesas Abiertas ({pedidosAbiertos.length})</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                   {pedidosAbiertos.map((pa: any) => (
-                    <div key={pa.id} className="border-2 border-orange-300 rounded-lg p-3 bg-orange-50">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-lg">{pa.mesa}</span>
-                        <span className="text-sm text-gray-500">{pa.hora}</span>
+                    <div key={pa.id} className="border-2 border-orange-300 rounded-lg p-2 md:p-3 bg-orange-50">
+                      <div className="flex justify-between items-center mb-1 md:mb-2">
+                        <span className="font-bold text-sm md:text-base">{pa.mesa}</span>
+                        <span className="text-xs text-gray-500">{pa.hora}</span>
                       </div>
                       <div className="text-sm mb-2">
                         {pa.productos?.map((p: any, i: number) => (
@@ -669,29 +667,29 @@ export default function Ventas() {
         )}
 
         {vista === "delivery" && (
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">🛵 Ventas Delivery - Máncora Go!</h2>
+          <div className="bg-white rounded-lg shadow p-3 md:p-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+              <h2 className="text-base md:text-lg font-bold">🛵 Delivery</h2>
               <button
                 onClick={() => setVerRegistroDelivery(!verRegistroDelivery)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="w-full sm:w-auto bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
               >
-                📋 {verRegistroDelivery ? "← Resumen" : "Registro de Delivery"}
+                📋 {verRegistroDelivery ? "← Resumen" : "Registro"}
               </button>
             </div>
             
-            <div className="bg-orange-100 p-4 rounded-lg mb-4">
-              <p className="text-orange-800 font-bold">Comisión Máncora Go!: 10%</p>
-              <p className="text-sm text-orange-600">Las ventas desde Máncora Go! se registran desde el módulo de Salón.</p>
+            <div className="bg-orange-100 p-3 rounded-lg mb-4">
+              <p className="text-orange-800 font-bold text-sm">Comisión Máncora Go!: 10%</p>
+              <p className="text-xs text-orange-600">Las ventas se registran desde el módulo de Salón.</p>
             </div>
             
             {verRegistroDelivery ? (
               <>
-                <div className="flex items-center gap-4 mb-4">
-                  <label className="text-sm font-bold">Filtrar por fecha:</label>
+                <div className="flex items-center gap-2 mb-4">
+                  <label className="text-xs md:text-sm font-bold">Fecha:</label>
                   <input 
                     type="date" 
-                    className="border p-2 rounded"
+                    className="border p-2 rounded text-sm flex-1"
                     value={fechaFiltroDelivery}
                     onChange={(e) => setFechaFiltroDelivery(e.target.value)}
                   />
@@ -713,12 +711,12 @@ export default function Ventas() {
                   return (
                     <>
                       {deliveryVentas.length > 0 && (
-                        <div className="bg-green-100 p-4 rounded-lg mb-4">
-                          <p className="text-green-800 font-bold">Delivery ({fechaFiltroDelivery}): S/.{totalDelivery.toFixed(2)}</p>
-                          <div className="flex flex-wrap gap-4 mt-2 pt-2 border-t border-green-200">
-                            <span className="text-sm">Total Ventas: <strong>S/.{totalOriginal.toFixed(2)}</strong></span>
-                            <span className="text-sm text-orange-600">Comisiones (-10%): <strong>-S/.{totalComision.toFixed(2)}</strong></span>
-                            <span className="text-sm font-bold">Pedidos: <strong>{deliveryVentas.length}</strong></span>
+                        <div className="bg-green-100 p-3 rounded-lg mb-4">
+                          <p className="text-green-800 font-bold">Delivery: S/.{totalDelivery.toFixed(2)}</p>
+                          <div className="flex flex-wrap gap-2 mt-1 pt-1 border-t border-green-200 text-xs">
+                            <span>Total: <strong>S/.{totalOriginal.toFixed(2)}</strong></span>
+                            <span className="text-orange-600">Comisión: <strong>-S/.{totalComision.toFixed(2)}</strong></span>
+                            <span>Pedidos: <strong>{deliveryVentas.length}</strong></span>
                           </div>
                         </div>
                       )}
@@ -839,14 +837,14 @@ export default function Ventas() {
         )}
 
         {vista === "registro" && (
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-lg font-bold mb-4">📊 Registro de Ventas</h2>
+          <div className="bg-white rounded-lg shadow p-3 md:p-4">
+            <h2 className="text-base md:text-lg font-bold mb-3 md:mb-4">📊 Registro de Ventas</h2>
             
-            <div className="flex items-center gap-4 mb-4">
-              <label className="text-sm font-bold">Filtrar por fecha:</label>
+            <div className="flex items-center gap-2 mb-3 md:mb-4">
+              <label className="text-xs md:text-sm font-bold">Fecha:</label>
               <input 
                 type="date" 
-                className="border p-2 rounded"
+                className="border p-2 rounded text-sm flex-1"
                 value={fechaFiltroVentas}
                 onChange={(e) => setFechaFiltroVentas(e.target.value)}
               />

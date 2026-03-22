@@ -688,37 +688,37 @@ export default function Caja() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-green-600 text-white p-4">
+      <header className="bg-green-600 text-white p-3 md:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">💰 Caja Chica</h1>
+          <h1 className="text-base md:text-xl font-bold">💰 Caja Chica</h1>
           <div className="flex gap-2">
-            <button onClick={() => router.push("/menu")} className="bg-green-700 px-4 py-2 rounded hover:bg-green-800">
-              ← Menú Principal
+            <button onClick={() => router.push("/menu")} className="bg-green-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-green-800">
+              ← Menú
             </button>
-            <button onClick={cerrarSesion} className="bg-red-500 px-4 py-2 rounded hover:bg-red-600">
-              Cerrar Sesión
+            <button onClick={cerrarSesion} className="bg-red-500 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-600">
+              Salir
             </button>
           </div>
         </div>
       </header>
-      <div className="container mx-auto p-4">
-        <div className="flex gap-2 mb-4">
+      <div className="container mx-auto p-3 md:p-4">
+        <div className="flex gap-2 mb-3 md:mb-4 overflow-x-auto pb-2">
           <button 
             onClick={() => setVista("efectivo")} 
-            className={`px-4 py-2 rounded ${vista === "efectivo" ? "bg-green-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "efectivo" ? "bg-green-600 text-white" : "bg-white text-gray-700"}`}
           >
             💵 Efectivo
           </button>
           <button 
             onClick={() => setVista("compras")} 
-            className={`px-4 py-2 rounded ${vista === "compras" ? "bg-orange-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "compras" ? "bg-orange-600 text-white" : "bg-white text-gray-700"}`}
           >
             🛒 Compras
           </button>
         </div>
         
         {vista === "efectivo" && (
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="bg-white rounded-lg shadow p-3 md:p-4">
             {notificacion && (
               <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                 {notificacion}
@@ -934,27 +934,27 @@ export default function Caja() {
           )}
 
           {vista === "compras" && (
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold">📋 Lista de Compras</h2>
-                <div className="flex gap-2">
+            <div className="bg-white rounded-lg shadow p-3 md:p-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3 md:mb-4">
+                <h2 className="text-base md:text-lg font-bold">📋 Lista de Compras</h2>
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                   <button 
                     onClick={enviarListaWhatsApp}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    className="flex-1 sm:flex-none bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
                   >
                     📤 Enviar
                   </button>
                   <button 
                     onClick={() => setMostrarRegistroCompras(!mostrarRegistroCompras)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    className="flex-1 sm:flex-none bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
                   >
-                    {mostrarRegistroCompras ? "▼ Ocultar Registro" : "▶ Registro de Compras"}
+                    {mostrarRegistroCompras ? "Ocultar" : "Registro"}
                   </button>
                   <button 
                     onClick={() => setModalRegistrarCompra(true)}
-                    className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700"
+                    className="flex-1 sm:flex-none bg-orange-600 text-white px-3 py-2 rounded text-sm hover:bg-orange-700"
                   >
-                    + Registrar Compra
+                    + Compra
                   </button>
                 </div>
               </div>

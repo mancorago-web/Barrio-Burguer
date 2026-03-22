@@ -357,17 +357,17 @@ function InventarioContent() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white p-4">
+      <header className="bg-blue-600 text-white p-3 md:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">📦 Inventario {rol === "cocina" ? "- Cocina" : rol === "jefe" ? " - Jefe" : ""}</h1>
+          <h1 className="text-base md:text-xl font-bold">📦 Inventario</h1>
           <div className="flex gap-2">
             {(rol === "admin" || rol === "jefe") && (
-              <button onClick={() => router.push("/menu")} className="bg-blue-700 px-4 py-2 rounded hover:bg-blue-800">
-                ← Menú Principal
+              <button onClick={() => router.push("/menu")} className="bg-blue-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-blue-800">
+                ← Menú
               </button>
             )}
-            <button onClick={cerrarSesion} className="bg-red-600 px-4 py-2 rounded hover:bg-red-700">
-              Cerrar Sesión
+            <button onClick={cerrarSesion} className="bg-red-600 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-700">
+              Salir
             </button>
           </div>
         </div>
@@ -379,22 +379,22 @@ function InventarioContent() {
         </div>
       )}
 
-      <div className="container mx-auto p-4">
-        <div className="flex gap-2 mb-4 flex-wrap">
-          <button onClick={() => setVista("stock")} className={`px-4 py-2 rounded ${vista === "stock" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📦 Stock</button>
+      <div className="container mx-auto p-3 md:p-4">
+        <div className="flex gap-2 mb-3 md:mb-4 flex-wrap overflow-x-auto pb-2">
+          <button onClick={() => setVista("stock")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "stock" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📦 Stock</button>
           {(rol === "admin" || rol === "jefe") && (
             <>
-              <button onClick={() => setVista("recetas")} className={`px-4 py-2 rounded ${vista === "recetas" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📋 Recetas</button>
+              <button onClick={() => setVista("recetas")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "recetas" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📋 Recetas</button>
               <div className="flex-1"></div>
-              <button onClick={() => setVista("baseDatos")} className={`px-4 py-2 rounded ${vista === "baseDatos" ? "bg-green-600 text-white" : "bg-green-100 text-green-700"}`}>🗄️ Base de datos</button>
+              <button onClick={() => setVista("baseDatos")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "baseDatos" ? "bg-green-600 text-white" : "bg-green-100 text-green-700"}`}>🗄️ Datos</button>
             </>
           )}
         </div>
 
           {vista === "stock" && (
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">Productos en Stock</h2>
+          <div className="bg-white rounded-lg shadow p-3 md:p-4">
+            <div className="flex justify-between items-center mb-3 md:mb-4">
+              <h2 className="text-base md:text-lg font-bold">Productos en Stock</h2>
               {ultimaActualizacion && (
                 <span className="text-sm text-gray-500">
                   Última Actualización: {ultimaActualizacion.split(" - ")[0]}
@@ -416,9 +416,9 @@ function InventarioContent() {
               const borderColor = hayFaltantes ? "border-yellow-400" : "border-green-400";
               
               return (
-              <div key={cat} className="mb-6">
+              <div key={cat} className="mb-4 md:mb-6">
                 <h3 
-                  className={`${bgColor} ${borderColor} px-4 py-2 font-bold rounded-t-lg uppercase cursor-pointer flex justify-between items-center border-b-2`}
+                  className={`${bgColor} ${borderColor} px-3 md:px-4 py-2 font-bold rounded-t-lg uppercase cursor-pointer flex justify-between items-center border-b-2 text-sm md:text-base`}
                   onClick={() => setCategoriasExpandidas(prev => ({ ...prev, [cat]: !prev[cat] }))}
                 >
                   <span>{cat} {hayFaltantes ? "⚠️" : "✓"}</span>
@@ -426,24 +426,24 @@ function InventarioContent() {
                 </h3>
                 {categoriasExpandidas[cat] && (
                   <div className="overflow-x-auto border border-t-0">
-                  <table className="w-full text-xs md:text-sm">
+                  <table className="w-full text-xs">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="p-2 text-left w-32 md:w-40">Producto</th>
-                        <th className="p-2 text-center w-28 md:w-32">Stock</th>
-                        <th className="p-2 text-center w-20 md:w-24 hidden sm:table-cell">Mín.</th>
-                        <th className="p-2 text-center w-16">Estado</th>
+                        <th className="p-2 text-left w-28 md:w-40">Producto</th>
+                        <th className="p-2 text-center w-24 md:w-32">Stock</th>
+                        <th className="p-2 text-center w-16 md:w-24 hidden sm:table-cell">Mín.</th>
+                        <th className="p-2 text-center w-12">Estado</th>
                       </tr>
                     </thead>
                     <tbody>
                       {productos.filter(p => p.categoria === cat).map(p => (
                         <tr key={p.id} className="border-b hover:bg-gray-50">
-                          <td className="p-2 text-sm">{p.nombre}</td>
+                          <td className="p-1 md:p-2 text-xs md:text-sm">{p.nombre}</td>
                           <td className="p-1">
                             <div className="flex items-center justify-center">
                               <button 
                                 onClick={() => actualizarStock(p.id, -1)}
-                                className="bg-red-500 text-white w-7 h-7 md:w-8 md:h-8 rounded hover:bg-red-600 flex items-center justify-center flex-shrink-0 font-bold"
+                                className="bg-red-500 text-white w-6 h-6 md:w-7 md:h-7 rounded hover:bg-red-600 flex items-center justify-center flex-shrink-0 font-bold text-xs md:text-sm"
                               >
                                 -
                               </button>
@@ -451,7 +451,7 @@ function InventarioContent() {
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                className="w-16 md:w-20 text-center border-2 border-blue-300 rounded py-1 md:py-2 mx-0.5 md:mx-1 text-sm md:text-base font-medium focus:border-blue-500 focus:outline-none"
+                                className="w-14 md:w-20 text-center border border-blue-300 rounded py-1 mx-0.5 text-xs md:text-sm focus:border-blue-500 focus:outline-none"
                                 value={p.stockActual}
                                 onChange={(e) => {
                                   const valor = parseFloat(e.target.value);
@@ -464,21 +464,21 @@ function InventarioContent() {
                               />
                               <button 
                                 onClick={() => actualizarStock(p.id, 1)}
-                                className="bg-green-500 text-white w-7 h-7 md:w-8 md:h-8 rounded hover:bg-green-600 flex items-center justify-center flex-shrink-0 font-bold"
+                                className="bg-green-500 text-white w-6 h-6 md:w-7 md:h-7 rounded hover:bg-green-600 flex items-center justify-center flex-shrink-0 font-bold text-xs md:text-sm"
                               >
                                 +
                               </button>
                               <span className="text-xs text-gray-500 ml-1 hidden md:inline">{p.unidad}</span>
                             </div>
                           </td>
-                          <td className="p-2 text-center font-medium hidden sm:table-cell">
+                          <td className="p-1 md:p-2 text-center font-medium text-xs hidden sm:table-cell">
                             {p.stockMinimo?.toFixed(2)}
                           </td>
-                          <td className="p-2 text-center">
+                          <td className="p-1 md:p-2 text-center">
                             {p.stockActual < p.stockMinimo ? (
-                              <span className="text-red-600 font-bold text-xs md:text-sm">⚠️</span>
+                              <span className="text-red-600 font-bold text-xs">⚠️</span>
                             ) : (
-                              <span className="text-green-600 text-xs md:text-sm">✓</span>
+                              <span className="text-green-600 text-xs">✓</span>
                             )}
                           </td>
                         </tr>
