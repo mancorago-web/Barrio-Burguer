@@ -443,28 +443,28 @@ function InventarioContent() {
                             <div className="flex items-center justify-center">
                               <button 
                                 onClick={() => actualizarStock(p.id, -1)}
-                                className="bg-red-500 text-white w-6 h-6 md:w-7 md:h-7 rounded hover:bg-red-600 flex items-center justify-center flex-shrink-0 font-bold text-xs md:text-sm"
+                                className="bg-red-500 text-white w-7 h-7 md:w-8 md:h-8 rounded hover:bg-red-600 flex items-center justify-center flex-shrink-0 font-bold text-sm md:text-base"
                               >
                                 -
                               </button>
                               <input 
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                className="w-14 md:w-20 text-center border border-blue-300 rounded py-1 mx-0.5 text-xs md:text-sm focus:border-blue-500 focus:outline-none"
+                                type="text"
+                                inputMode="decimal"
+                                className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white"
                                 value={p.stockActual}
                                 onChange={(e) => {
                                   const valor = parseFloat(e.target.value);
-                                  if (!isNaN(valor) && valor >= 0) {
+                                  if (e.target.value === "" || (!isNaN(valor) && valor >= 0)) {
                                     setProductos(productos.map(prod => 
-                                      prod.id === p.id ? { ...prod, stockActual: valor } : prod
+                                      prod.id === p.id ? { ...prod, stockActual: e.target.value === "" ? 0 : valor } : prod
                                     ));
                                   }
                                 }}
+                                onFocus={(e) => e.target.select()}
                               />
                               <button 
                                 onClick={() => actualizarStock(p.id, 1)}
-                                className="bg-green-500 text-white w-6 h-6 md:w-7 md:h-7 rounded hover:bg-green-600 flex items-center justify-center flex-shrink-0 font-bold text-xs md:text-sm"
+                                className="bg-green-500 text-white w-7 h-7 md:w-8 md:h-8 rounded hover:bg-green-600 flex items-center justify-center flex-shrink-0 font-bold text-sm md:text-base"
                               >
                                 +
                               </button>

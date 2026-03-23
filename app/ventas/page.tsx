@@ -991,32 +991,31 @@ export default function Ventas() {
                       
                       return (
                         <>
-                          <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div className="bg-blue-100 p-4 rounded-lg text-center">
-                              <p className="text-sm text-blue-600">Costo Total</p>
-                              <p className="text-2xl font-bold text-blue-800">S/.{totalCosto.toFixed(2)}</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-4">
+                            <div className="bg-blue-100 p-2 sm:p-4 rounded-lg text-center">
+                              <p className="text-xs sm:text-sm text-blue-600">Costo Total</p>
+                              <p className="text-lg sm:text-2xl font-bold text-blue-800">S/.{totalCosto.toFixed(2)}</p>
                             </div>
-                            <div className="bg-green-100 p-4 rounded-lg text-center">
-                              <p className="text-sm text-green-600">Ganancia Aproximada</p>
-                              <p className="text-2xl font-bold text-green-800">S/.{gananciaAproximada.toFixed(2)}</p>
+                            <div className="bg-green-100 p-2 sm:p-4 rounded-lg text-center">
+                              <p className="text-xs sm:text-sm text-green-600">Ganancia Aprox.</p>
+                              <p className="text-lg sm:text-2xl font-bold text-green-800">S/.{gananciaAproximada.toFixed(2)}</p>
                             </div>
-                            <div className="bg-purple-100 p-4 rounded-lg text-center">
-                              <p className="text-sm text-purple-600">Margen de Ganancia</p>
-                              <p className="text-2xl font-bold text-purple-800">{margenPorcentaje.toFixed(1)}%</p>
+                            <div className="bg-purple-100 p-2 sm:p-4 rounded-lg text-center">
+                              <p className="text-xs sm:text-sm text-purple-600">Margen</p>
+                              <p className="text-lg sm:text-2xl font-bold text-purple-800">{margenPorcentaje.toFixed(1)}%</p>
                             </div>
                           </div>
                           
                           {consumoArray.length > 0 ? (
                             <div className="overflow-x-auto">
-                              <table className="w-full text-sm">
+                              <table className="w-full text-xs md:text-sm">
                                 <thead>
                                   <tr className="bg-gray-200">
-                                    <th className="p-2 text-left">Insumo</th>
-                                    <th className="p-2 text-right">Stock Actual</th>
-                                    <th className="p-2 text-right">Consumido</th>
-                                    <th className="p-2 text-right">Nuevo Stock</th>
-                                    <th className="p-2 text-right">Costo Unit.</th>
-                                    <th className="p-2 text-right">Costo Total</th>
+                                    <th className="p-1 md:p-2 text-left">Insumo</th>
+                                    <th className="p-1 md:p-2 text-right hidden sm:table-cell">Stock</th>
+                                    <th className="p-1 md:p-2 text-right">Consumido</th>
+                                    <th className="p-1 md:p-2 text-right hidden md:table-cell">Nuevo</th>
+                                    <th className="p-1 md:p-2 text-right">Costo</th>
                                   </tr>
                                 </thead>
                                 <tbody>
