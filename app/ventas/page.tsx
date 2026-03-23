@@ -179,6 +179,26 @@ export default function Ventas() {
     return getTotal() + propina;
   };
 
+  const eliminarVenta = async (id: number) => {
+    if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
+    
+    try {
+      const ventasRef = doc(db, "ventas", "pedidos");
+      const ventasSnap = await getDoc(ventasRef);
+      const pedidosAnteriores = ventasSnap.exists() ? ventasSnap.data().pedidos || [] : [];
+      
+      const pedidosFiltrados = pedidosAnteriores.filter((p: any) => p.id !== id);
+      
+      await setDoc(ventasRef, { pedidos: pedidosFiltrados }, { merge: true });
+      
+      setVentas(pedidosFiltrados);
+      alert("Venta eliminada correctamente");
+    } catch (error) {
+      console.error("Error eliminando venta:", error);
+      alert("Error al eliminar la venta");
+    }
+  };
+
   const guardarPedido = async () => {
     if (pedido.length === 0) return;
     
@@ -892,42 +912,49 @@ export default function Ventas() {
                   {ventasFiltradas.length === 0 ? (
                     <p className="text-gray-500 text-center py-4">No hay ventas en esta fecha.</p>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs md:text-sm">
-                        <thead>
-                          <tr className="bg-gray-200">
-                            <th className="p-1 md:p-2 text-left">Hora</th>
-                            <th className="p-1 md:p-2 text-left hidden sm:table-cell">Tipo</th>
-                            <th className="p-1 md:p-2 text-left">Mesa</th>
-                            <th className="p-1 md:p-2 text-right">Total</th>
-                            <th className="p-1 md:p-2 text-left hidden md:table-cell">Método</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {ventasFiltradas.map((v, idx) => (
-                            <tr key={idx} className="border-b">
-                              <td className="p-1 md:p-2">{v.hora}</td>
-                              <td className="p-1 md:p-2 hidden sm:table-cell">
-                                <span className={`px-1 md:px-2 py-0.5 md:py-1 rounded text-white text-xs ${v.tipo === "salon" ? "bg-blue-500" : "bg-orange-500"}`}>
+                    <div className="space-y-2">
+                      {ventasFiltradas.map((v, idx) => (
+                        <div key={idx} className="bg-white border rounded-lg p-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold">{v.hora}</span>
+                                <span className={`px-2 py-0.5 rounded text-white text-xs ${v.tipo === "salon" ? "bg-blue-500" : "bg-orange-500"}`}>
                                   {v.tipo === "salon" ? "Salón" : "Delivery"}
                                 </span>
-                              </td>
-                              <td className="p-1 md:p-2">{v.mesa || "-"}</td>
-                              <td className="p-1 md:p-2 text-right font-bold">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</td>
-                              <td className="p-1 md:p-2 hidden md:table-cell">
-                                <span className={`px-1 md:px-2 py-0.5 md:py-1 rounded text-white text-xs ${
+                                <span className="font-medium">{v.mesa}</span>
+                                <span className={`px-2 py-0.5 rounded text-white text-xs ${
                                   v.metodoPago === "efectivo" ? "bg-green-500" : 
                                   v.metodoPago === "yape" ? "bg-orange-500" : 
                                   "bg-blue-500"
                                 }`}>
-                                  {v.metodoPago === "efectivo" ? "Efectivo" : 
-                                   v.metodoPago === "yape" ? "Yape" : "POS"}
+                                  {v.metodoPago === "efectivo" ? "Efectivo" : v.metodoPago === "yape" ? "Yape" : "POS"}
                                 </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                                {v.propina > 0 && (
+                                  <span className="text-xs text-green-600">+Propina</span>
+                                )}
+                              </div>
+                              <div className="mt-2 text-sm text-gray-600">
+                                {v.productos?.map((p: any, i: number) => (
+                                  <div key={i} className="flex justify-between">
+                                    <span>{p.cantidad}x {p.producto?.nombre}</span>
+                                    <span className="font-medium">S/.{(p.producto?.precio * p.cantidad).toFixed(2)}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2 ml-2">
+                              <span className="font-bold text-green-600">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
+                              <button
+                                onClick={() => eliminarVenta(v.id)}
+                                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                              >
+                                ✕ Eliminar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 
