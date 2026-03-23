@@ -77,6 +77,7 @@ export default function Caja() {
   const [ventasDelDia, setVentasDelDia] = useState<any[]>([]);
   const [modalRegistroCierres, setModalRegistroCierres] = useState(false);
   const [cierresAnteriores, setCierresAnteriores] = useState<any[]>([]);
+  const [guardadoExitoso, setGuardadoExitoso] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -235,6 +236,30 @@ export default function Caja() {
       }, { merge: true });
     } catch (error) {
       console.error("Error guardando por pedir:", error);
+    }
+  };
+
+  const guardarCantidadesCompradas = async () => {
+    const porPedirObj: Record<string, number> = {};
+    productosPorPedir.forEach(p => {
+      porPedirObj[p.id] = p.porPedir !== undefined ? p.porPedir : 0;
+    });
+
+    const ahora = new Date();
+    const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+
+    try {
+      await setDoc(doc(db, "caja", "productosPorPedir"), {
+        productos: porPedirObj,
+        ultimaActualizacion: `${ahora.toISOString().split("T")[0]} - ${hora} - ${nombreUsuario}`
+      }, { merge: true });
+      
+      setUltimaActualizacionLista(`${ahora.toISOString().split("T")[0]} - ${hora} - ${nombreUsuario}`);
+      setGuardadoExitoso(true);
+      setTimeout(() => setGuardadoExitoso(false), 3000);
+    } catch (error) {
+      console.error("Error guardando cantidades compradas:", error);
+      alert("Error al guardar");
     }
   };
 
@@ -1081,25 +1106,12 @@ export default function Caja() {
                                 min="0"
                                 className="w-20 md:w-24 text-center border-2 border-orange-300 rounded-lg py-2 px-2 text-sm md:text-base font-medium focus:border-orange-500 focus:outline-none bg-white appearance-none"
                                 value={porPedir}
-                                onChange={async (e) => {
+                                onChange={(e) => {
                                   const nuevaCantidad = parseFloat(e.target.value) || 0;
                                   const productosActualizados = productosPorPedir.map(item => 
                                     item.id === p.id ? { ...item, porPedir: nuevaCantidad } : item
                                   );
                                   setProductosPorPedir(productosActualizados);
-                                  
-                                  const porPedirObj: Record<string, number> = {};
-                                  productosActualizados.forEach(item => {
-                                    porPedirObj[item.id] = item.porPedir !== undefined ? item.porPedir : 0;
-                                  });
-                                  
-                                  try {
-                                    await setDoc(doc(db, "caja", "productosPorPedir"), {
-                                      productos: porPedirObj
-                                    }, { merge: true });
-                                  } catch (error) {
-                                    console.error("Error guardando por pedir:", error);
-                                  }
                                 }}
                                 onFocus={(e) => (e.target as HTMLInputElement).select()}
                               />
@@ -1116,7 +1128,7 @@ export default function Caja() {
                 )}
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div className="bg-green-100 px-4 py-2 rounded">
                   {(() => {
                     const itemsConPedido = productosPorPedir.filter(p => (p.porPedir !== undefined ? p.porPedir : 0) > 0);
@@ -1126,12 +1138,28 @@ export default function Caja() {
                     }, 0);
                     return (
                       <p className="font-bold text-green-800">
-                        Total lista de compras: S/.{total.toFixed(2)} ({itemsConPedido.length} items)
+                        Total: S/.{total.toFixed(2)} ({itemsConPedido.length} items)
                       </p>
                     );
                   })()}
                 </div>
+                <button 
+                  onClick={guardarCantidadesCompradas}
+                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 font-bold"
+                >
+                  💾 Guardar
+                </button>
               </div>
+              {guardadoExitoso && (
+                <div className="bg-green-500 text-white px-4 py-2 rounded mt-2 text-center">
+                  ✓ Guardado exitosamente
+                </div>
+              )}
+              {ultimaActualizacionLista && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Última actualización: {ultimaActualizacionLista}
+                </p>
+              )}
             </div>
           )}
 
