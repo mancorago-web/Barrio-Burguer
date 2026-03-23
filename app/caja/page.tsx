@@ -1071,10 +1071,12 @@ export default function Caja() {
                               <input 
                                 type="text"
                                 inputMode="decimal"
+                                pattern="[0-9,]*"
                                 className="w-20 md:w-24 border-2 border-orange-300 rounded-lg py-2 px-2 text-right text-sm md:text-base font-medium focus:border-orange-500 focus:outline-none bg-white"
-                                value={porPedir}
+                                value={String(porPedir).replace(".", ",")}
                                 onChange={async (e) => {
-                                  const nuevaCantidad = parseFloat(e.target.value.replace(",", ".")) || 0;
+                                  const input = e.target.value.replace(/[^0-9,]/g, '');
+                                  const nuevaCantidad = parseFloat(input.replace(",", ".")) || 0;
                                   const productosActualizados = productosPorPedir.map(item => 
                                     item.id === p.id ? { ...item, porPedir: nuevaCantidad } : item
                                   );

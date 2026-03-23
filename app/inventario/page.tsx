@@ -450,13 +450,15 @@ function InventarioContent() {
                               <input 
                                 type="text"
                                 inputMode="decimal"
+                                pattern="[0-9,]*"
                                 className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white"
-                                value={p.stockActual}
+                                value={String(p.stockActual).replace(".", ",")}
                                 onChange={(e) => {
-                                  const valor = parseFloat(e.target.value.replace(",", "."));
-                                  if (e.target.value === "" || (!isNaN(valor) && valor >= 0)) {
+                                  const input = e.target.value.replace(/[^0-9,]/g, '');
+                                  const valor = parseFloat(input.replace(",", "."));
+                                  if (input === "" || (!isNaN(valor) && valor >= 0)) {
                                     setProductos(productos.map(prod => 
-                                      prod.id === p.id ? { ...prod, stockActual: e.target.value === "" ? 0 : valor } : prod
+                                      prod.id === p.id ? { ...prod, stockActual: input === "" ? 0 : valor } : prod
                                     ));
                                   }
                                 }}
