@@ -77,7 +77,6 @@ export default function Caja() {
   const [ventasDelDia, setVentasDelDia] = useState<any[]>([]);
   const [modalRegistroCierres, setModalRegistroCierres] = useState(false);
   const [cierresAnteriores, setCierresAnteriores] = useState<any[]>([]);
-  const [guardadoExitoso, setGuardadoExitoso] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -236,30 +235,6 @@ export default function Caja() {
       }, { merge: true });
     } catch (error) {
       console.error("Error guardando por pedir:", error);
-    }
-  };
-
-  const guardarCantidadesCompradas = async () => {
-    const porPedirObj: Record<string, number> = {};
-    productosPorPedir.forEach(p => {
-      porPedirObj[p.id] = p.porPedir !== undefined ? p.porPedir : 0;
-    });
-
-    const ahora = new Date();
-    const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
-
-    try {
-      await setDoc(doc(db, "caja", "productosPorPedir"), {
-        productos: porPedirObj,
-        ultimaActualizacion: `${ahora.toISOString().split("T")[0]} - ${hora} - ${nombreUsuario}`
-      }, { merge: true });
-      
-      setUltimaActualizacionLista(`${ahora.toISOString().split("T")[0]} - ${hora} - ${nombreUsuario}`);
-      setGuardadoExitoso(true);
-      setTimeout(() => setGuardadoExitoso(false), 3000);
-    } catch (error) {
-      console.error("Error guardando cantidades compradas:", error);
-      alert("Error al guardar");
     }
   };
 
@@ -1128,7 +1103,7 @@ export default function Caja() {
                 )}
               </div>
 
-              <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="mt-4 flex justify-end">
                 <div className="bg-green-100 px-4 py-2 rounded">
                   {(() => {
                     const itemsConPedido = productosPorPedir.filter(p => (p.porPedir !== undefined ? p.porPedir : 0) > 0);
@@ -1143,18 +1118,7 @@ export default function Caja() {
                     );
                   })()}
                 </div>
-                <button 
-                  onClick={guardarCantidadesCompradas}
-                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 font-bold"
-                >
-                  💾 Guardar
-                </button>
               </div>
-              {guardadoExitoso && (
-                <div className="bg-green-500 text-white px-4 py-2 rounded mt-2 text-center">
-                  ✓ Guardado exitosamente
-                </div>
-              )}
               {ultimaActualizacionLista && (
                 <p className="text-xs text-gray-500 mt-2">
                   Última actualización: {ultimaActualizacionLista}
