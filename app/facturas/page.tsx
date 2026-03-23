@@ -161,9 +161,9 @@ export default function Facturas() {
           <p className="text-gray-600 mb-4">No tienes permisos para ver esta sección.</p>
           <button 
             onClick={() => router.push("/menu")}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
           >
-            Volver al menú
+            ← Menú
           </button>
         </div>
       </div>
@@ -172,39 +172,39 @@ export default function Facturas() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-yellow-600 text-white p-4">
+      <header className="bg-yellow-600 text-white p-3 md:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">🧾 Facturas</h1>
+          <h1 className="text-base md:text-xl font-bold">🧾 Facturas</h1>
           <div className="flex gap-2">
             <button 
               onClick={() => router.push("/menu")} 
-              className="bg-yellow-700 px-4 py-2 rounded hover:bg-yellow-800"
+              className="bg-yellow-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-yellow-800"
             >
-              ← Menú Principal
+              ← Menú
             </button>
             <button 
               onClick={async () => { await signOut(auth); router.push("/"); }}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+              className="bg-red-500 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-600"
             >
-              Cerrar Sesión
+              Salir
             </button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto p-4">
-        <div className="flex gap-2 mb-4">
+      <div className="container mx-auto p-3 md:p-4">
+        <div className="flex gap-2 mb-3 md:mb-4 overflow-x-auto pb-2">
           <button 
             onClick={() => setVista("clientes")}
-            className={`px-4 py-2 rounded ${vista === "clientes" ? "bg-yellow-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "clientes" ? "bg-yellow-600 text-white" : "bg-white text-gray-700"}`}
           >
-            🧾 Facturas Clientes
+            🧾 Clientes
           </button>
           <button 
             onClick={() => setVista("servicios")}
-            className={`px-4 py-2 rounded ${vista === "servicios" ? "bg-yellow-600 text-white" : "bg-white text-gray-700"}`}
+            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "servicios" ? "bg-yellow-600 text-white" : "bg-white text-gray-700"}`}
           >
-            💡 Servicios Básicos
+            💡 Servicios
           </button>
         </div>
 
@@ -214,7 +214,7 @@ export default function Facturas() {
               <h2 className="text-lg font-bold">Facturas Clientes</h2>
               <button 
                 onClick={() => setModalFactura(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
               >
                 + Nueva Factura
               </button>

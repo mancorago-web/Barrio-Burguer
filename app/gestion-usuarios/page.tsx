@@ -122,28 +122,28 @@ export default function GestionUsuarios() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-blue-600 text-white p-4">
+      <header className="bg-blue-600 text-white p-3 md:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">👥 Gestión de Usuarios</h1>
+          <h1 className="text-base md:text-xl font-bold">👥 Usuarios</h1>
           <div className="flex gap-2">
             <button 
               onClick={() => router.push("/menu")}
-              className="bg-blue-700 px-4 py-2 rounded hover:bg-blue-800"
+              className="bg-blue-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-blue-800"
             >
-              ← Menú Principal
+              ← Menú
             </button>
             <button 
               onClick={cerrarSesion}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+              className="bg-red-500 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-600"
             >
-              Cerrar Sesión
+              Salir
             </button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto p-4">
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+      <div className="container mx-auto p-3 md:p-4">
+        <div className="bg-white rounded-lg shadow p-4 md:p-6 mb-4 md:mb-6">
           <h2 className="text-lg font-bold mb-4">Crear Nuevo Usuario</h2>
           
           {error && (

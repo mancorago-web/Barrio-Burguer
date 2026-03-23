@@ -188,9 +188,9 @@ export default function Planillas() {
           <p className="text-gray-600 mb-4">No tienes permisos para ver esta sección.</p>
           <button 
             onClick={() => router.push("/menu")}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
           >
-            Volver al menú
+            ← Menú
           </button>
         </div>
       </div>
@@ -199,28 +199,28 @@ export default function Planillas() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-teal-600 text-white p-4">
+      <header className="bg-teal-600 text-white p-3 md:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">📋 Planillas</h1>
+          <h1 className="text-base md:text-xl font-bold">📋 Planillas</h1>
           <div className="flex gap-2">
             <button 
               onClick={() => router.push("/menu")} 
-              className="bg-teal-700 px-4 py-2 rounded hover:bg-teal-800"
+              className="bg-teal-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-teal-800"
             >
-              ← Menú Principal
+              ← Menú
             </button>
             <button 
               onClick={async () => { await signOut(auth); router.push("/"); }}
-              className="bg-red-500 px-4 py-2 rounded hover:bg-red-600"
+              className="bg-red-500 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-600"
             >
-              Cerrar Sesión
+              Salir
             </button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="container mx-auto p-3 md:p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
           {colaboradores.map(colab => {
             const totalMes = getTotalPagadoMes(colab.pagos);
             const pagosMes = getPagosDelMes(colab.pagos);
@@ -245,9 +245,9 @@ export default function Planillas() {
                       });
                       setModalPago(true);
                     }}
-                    className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+                    className="bg-teal-600 text-white px-3 py-2 rounded text-sm hover:bg-teal-700"
                   >
-                    + Registrar Pago
+                    + Pago
                   </button>
                 </div>
 

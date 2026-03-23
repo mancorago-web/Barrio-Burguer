@@ -396,21 +396,21 @@ export default function Ventas() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-purple-600 text-white p-4">
+      <header className="bg-purple-600 text-white p-3 md:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold">🛒 Ventas</h1>
+          <h1 className="text-base md:text-xl font-bold">🛒 Ventas</h1>
           <div className="flex gap-2">
-            <button onClick={() => router.push("/menu")} className="bg-purple-700 px-4 py-2 rounded hover:bg-purple-800">
-              ← Menú Principal
+            <button onClick={() => router.push("/menu")} className="bg-purple-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-purple-800">
+              ← Menú
             </button>
-            <button onClick={cerrarSesion} className="bg-red-500 px-4 py-2 rounded hover:bg-red-600">
-              Cerrar Sesión
+            <button onClick={cerrarSesion} className="bg-red-500 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-600">
+              Salir
             </button>
           </div>
         </div>
       </header>
       
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-3 md:p-4">
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
           <button 
             onClick={() => setVista("salon")} 
