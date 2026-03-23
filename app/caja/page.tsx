@@ -768,7 +768,7 @@ export default function Caja() {
                 <div className="flex justify-end mt-2">
                   <button 
                     onClick={guardarMontoInicial}
-                    className="bg-green-600 text-white px-8 py-2 rounded hover:bg-green-700"
+                    className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
                   >
                     Guardar
                   </button>
@@ -799,12 +799,12 @@ export default function Caja() {
             </div>
 
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">Egresos en Efectivo</h2>
+              <h2 className="text-base md:text-lg font-bold">Egresos en Efectivo</h2>
               <button 
                 onClick={() => setModalAbierto(true)}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"
               >
-                + Registrar Egreso
+                + Egreso
               </button>
             </div>
 
@@ -816,9 +816,9 @@ export default function Caja() {
             <div className="mb-4">
               <button 
                 onClick={() => setMostrarRegistro(!mostrarRegistro)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
               >
-                {mostrarRegistro ? "▼ Ocultar Registro de Egresos" : "▶ Ver Registro de Egresos"}
+                {mostrarRegistro ? "Ocultar" : "Ver Egresos"}
               </button>
             </div>
 
@@ -917,13 +917,13 @@ export default function Caja() {
                 </div>
               )}
               
-              <div className="mt-4 flex justify-start gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <button 
                   onClick={() => {
                     cargarVentas();
                     setModalCierreDia(true);
                   }}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  className="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"
                 >
                   🔒 Cierre del Día
                 </button>
@@ -932,9 +932,9 @@ export default function Caja() {
                     cargarCierresAnteriores();
                     setModalRegistroCierres(true);
                   }}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
                 >
-                  📋 Ver Registro de Cierres
+                  📋 Cierres
                 </button>
               </div>
             </div>
