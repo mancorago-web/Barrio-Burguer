@@ -453,7 +453,7 @@ function InventarioContent() {
                                 className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white"
                                 value={p.stockActual}
                                 onChange={(e) => {
-                                  const valor = parseFloat(e.target.value);
+                                  const valor = parseFloat(e.target.value.replace(",", "."));
                                   if (e.target.value === "" || (!isNaN(valor) && valor >= 0)) {
                                     setProductos(productos.map(prod => 
                                       prod.id === p.id ? { ...prod, stockActual: e.target.value === "" ? 0 : valor } : prod
