@@ -448,13 +448,16 @@ function InventarioContent() {
                                 -
                               </button>
                               <input 
-                                type="text"
-                                inputMode="decimal"
-                                pattern="[0-9,]*"
+                                type="tel"
                                 className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white"
                                 value={String(p.stockActual).replace(".", ",")}
                                 onChange={(e) => {
-                                  const input = e.target.value.replace(/[^0-9,]/g, '');
+                                  let input = e.target.value;
+                                  input = input.replace(/[^0-9.,]/g, '');
+                                  const lastChar = input.slice(-1);
+                                  if (lastChar === ".") {
+                                    input = input.slice(0, -1) + ",";
+                                  }
                                   const valor = parseFloat(input.replace(",", "."));
                                   if (input === "" || (!isNaN(valor) && valor >= 0)) {
                                     setProductos(productos.map(prod => 
