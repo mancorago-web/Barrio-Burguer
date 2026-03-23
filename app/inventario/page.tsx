@@ -448,21 +448,18 @@ function InventarioContent() {
                                 -
                               </button>
                               <input 
-                                type="text"
-                                className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white"
-                                value={String(p.stockActual).replace(".", ",")}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white appearance-none"
+                                value={p.stockActual}
                                 onChange={(e) => {
-                                  const input = e.target.value;
-                                  const soloNumerosYComa = input.replace(/[^0-9,]/g, '');
-                                  const valorNum = parseFloat(soloNumerosYComa.replace(",", "."));
-                                  if (soloNumerosYComa === "" || (!isNaN(valorNum) && valorNum >= 0)) {
-                                    const nuevoValor = soloNumerosYComa === "" ? 0 : valorNum;
-                                    setProductos(productos.map(prod => 
-                                      prod.id === p.id ? { ...prod, stockActual: nuevoValor } : prod
-                                    ));
-                                  }
+                                  const valor = parseFloat(e.target.value) || 0;
+                                  setProductos(productos.map(prod => 
+                                    prod.id === p.id ? { ...prod, stockActual: valor } : prod
+                                  ));
                                 }}
-                                onFocus={(e) => e.target.select()}
+                                onFocus={(e) => (e.target as HTMLInputElement).select()}
                               />
                               <button 
                                 onClick={() => actualizarStock(p.id, 1)}

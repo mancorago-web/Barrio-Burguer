@@ -1069,13 +1069,13 @@ export default function Caja() {
                             <td className="p-2 text-right">{(p.stockMinimo || 0).toFixed(2)}</td>
                             <td className="p-2 text-right">
                               <input 
-                                type="text"
-                                className="w-20 md:w-24 border-2 border-orange-300 rounded-lg py-2 px-2 text-right text-sm md:text-base font-medium focus:border-orange-500 focus:outline-none bg-white"
-                                value={String(porPedir).replace(".", ",")}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="w-20 md:w-24 text-center border-2 border-orange-300 rounded-lg py-2 px-2 text-sm md:text-base font-medium focus:border-orange-500 focus:outline-none bg-white appearance-none"
+                                value={porPedir}
                                 onChange={async (e) => {
-                                  const input = e.target.value;
-                                  const soloNumerosYComa = input.replace(/[^0-9,]/g, '');
-                                  const nuevaCantidad = soloNumerosYComa === "" ? 0 : parseFloat(soloNumerosYComa.replace(",", ".")) || 0;
+                                  const nuevaCantidad = parseFloat(e.target.value) || 0;
                                   const productosActualizados = productosPorPedir.map(item => 
                                     item.id === p.id ? { ...item, porPedir: nuevaCantidad } : item
                                   );
@@ -1094,7 +1094,7 @@ export default function Caja() {
                                     console.error("Error guardando por pedir:", error);
                                   }
                                 }}
-                                onFocus={(e) => e.target.select()}
+                                onFocus={(e) => (e.target as HTMLInputElement).select()}
                               />
                             </td>
                             <td className="p-2 text-right">S/.{(p.precioCompra || 0).toFixed(2)}</td>
