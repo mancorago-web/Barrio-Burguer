@@ -86,6 +86,13 @@ export default function Menu() {
 
           {(rol === "admin" || rol === "jefe") && (
             <>
+              <Link href="/dashboard" className="block">
+                <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-purple-500">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">📊 Dashboard</h2>
+                  <p className="text-gray-600 text-sm">Ventas en tiempo real</p>
+                </div>
+              </Link>
+
               <Link href="/facturas" className="block">
                 <div className="bg-white p-4 md:p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-yellow-500">
                   <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-1 md:mb-2">🧾 Facturas</h2>
