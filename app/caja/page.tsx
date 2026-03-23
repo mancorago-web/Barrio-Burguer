@@ -1171,16 +1171,18 @@ export default function Caja() {
                           <td className="p-2 text-right">{(p.stockActual || 0).toFixed(2)}</td>
                           <td className="p-2 text-right">
                             <input 
-                              type="number" 
-                              min="0"
-                              step="0.01"
-                              max={porPedir}
-                              className="border p-1 rounded w-20 text-right"
-                              value={cantidad.toFixed(2)}
-                              onChange={(e) => setComprasARegistrar({
-                                ...comprasARegistrar,
-                                [p.id]: parseFloat(e.target.value) || 0
-                              })}
+                              type="text"
+                              className="border-2 border-orange-300 rounded-lg py-1.5 px-2 w-20 text-right text-sm focus:border-orange-500 focus:outline-none bg-white"
+                              value={String(cantidad).replace(".", ",")}
+                              onChange={(e) => {
+                                const input = e.target.value.replace(",", ".");
+                                const valor = parseFloat(input) || 0;
+                                setComprasARegistrar({
+                                  ...comprasARegistrar,
+                                  [p.id]: valor
+                                });
+                              }}
+                              onFocus={(e) => e.target.select()}
                             />
                           </td>
                           <td className="p-2 text-right">S/.{(p.precioCompra || 0).toFixed(2)}</td>
