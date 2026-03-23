@@ -1069,17 +1069,13 @@ export default function Caja() {
                             <td className="p-2 text-right">{(p.stockMinimo || 0).toFixed(2)}</td>
                             <td className="p-2 text-right">
                               <input 
-                                type="tel"
+                                type="text"
                                 className="w-20 md:w-24 border-2 border-orange-300 rounded-lg py-2 px-2 text-right text-sm md:text-base font-medium focus:border-orange-500 focus:outline-none bg-white"
                                 value={String(porPedir).replace(".", ",")}
                                 onChange={async (e) => {
-                                  let input = e.target.value;
-                                  input = input.replace(/[^0-9.,]/g, '');
-                                  const lastChar = input.slice(-1);
-                                  if (lastChar === ".") {
-                                    input = input.slice(0, -1) + ",";
-                                  }
-                                  const nuevaCantidad = parseFloat(input.replace(",", ".")) || 0;
+                                  const input = e.target.value;
+                                  const soloNumerosYComa = input.replace(/[^0-9,]/g, '');
+                                  const nuevaCantidad = soloNumerosYComa === "" ? 0 : parseFloat(soloNumerosYComa.replace(",", ".")) || 0;
                                   const productosActualizados = productosPorPedir.map(item => 
                                     item.id === p.id ? { ...item, porPedir: nuevaCantidad } : item
                                   );

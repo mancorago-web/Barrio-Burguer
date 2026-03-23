@@ -448,20 +448,17 @@ function InventarioContent() {
                                 -
                               </button>
                               <input 
-                                type="tel"
+                                type="text"
                                 className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white"
                                 value={String(p.stockActual).replace(".", ",")}
                                 onChange={(e) => {
-                                  let input = e.target.value;
-                                  input = input.replace(/[^0-9.,]/g, '');
-                                  const lastChar = input.slice(-1);
-                                  if (lastChar === ".") {
-                                    input = input.slice(0, -1) + ",";
-                                  }
-                                  const valor = parseFloat(input.replace(",", "."));
-                                  if (input === "" || (!isNaN(valor) && valor >= 0)) {
+                                  const input = e.target.value;
+                                  const soloNumerosYComa = input.replace(/[^0-9,]/g, '');
+                                  const valorNum = parseFloat(soloNumerosYComa.replace(",", "."));
+                                  if (soloNumerosYComa === "" || (!isNaN(valorNum) && valorNum >= 0)) {
+                                    const nuevoValor = soloNumerosYComa === "" ? 0 : valorNum;
                                     setProductos(productos.map(prod => 
-                                      prod.id === p.id ? { ...prod, stockActual: input === "" ? 0 : valor } : prod
+                                      prod.id === p.id ? { ...prod, stockActual: nuevoValor } : prod
                                     ));
                                   }
                                 }}
