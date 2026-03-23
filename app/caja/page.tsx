@@ -661,7 +661,14 @@ export default function Caja() {
         cierres: [cierreData, ...cierresAnterioresData]
       }, { merge: true });
       
-      setNotificacion("Cierre del día guardado exitosamente");
+      const configRef = doc(db, "ventas", "config");
+      await setDoc(configRef, {
+        ultimoCierre: hoy,
+        horaCierre: hora,
+        usuarioCierre: nombreUsuario
+      }, { merge: true });
+      
+      setNotificacion("Cierre del día guardado - Dashboard reiniciado");
       setTimeout(() => setNotificacion(null), 4000);
       setModalCierreDia(false);
     } catch (error) {

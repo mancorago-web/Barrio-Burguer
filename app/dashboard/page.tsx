@@ -29,6 +29,8 @@ export default function Dashboard() {
   const [rol, setRol] = useState<string | null>(null);
   const [ventas, setVentas] = useState<Venta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ultimoCierre, setUltimoCierre] = useState<string | null>(null);
+  const [mostrarModalCierre, setMostrarModalCierre] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -56,7 +58,9 @@ export default function Dashboard() {
     if (verificando) return;
 
     const ventasRef = doc(db, "ventas", "pedidos");
-    const unsubscribe = onSnapshot(ventasRef, (snapshot) => {
+    const configRef = doc(db, "ventas", "config");
+    
+    const unsubscribeVentas = onSnapshot(ventasRef, (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setVentas(data.pedidos || []);
@@ -64,8 +68,31 @@ export default function Dashboard() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    const unsubscribeConfig = onSnapshot(configRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setUltimoCierre(data.ultimoCierre || null);
+        
+        if (data.ultimoCierre) {
+          setMostrarModalCierre(true);
+        }
+      }
+    });
+
+    return () => {
+      unsubscribeVentas();
+      unsubscribeConfig();
+    };
   }, [verificando]);
+
+  useEffect(() => {
+    if (mostrarModalCierre && ultimoCierre) {
+      const timer = setTimeout(() => {
+        setMostrarModalCierre(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [mostrarModalCierre, ultimoCierre]);
 
   const cerrarSesion = async () => {
     await signOut(auth);
@@ -101,19 +128,20 @@ export default function Dashboard() {
   }
 
   const hoy = new Date().toISOString().split("T")[0];
-  const ventasHoy = ventas.filter(v => v.fecha === hoy);
+  const fechaDesde = ultimoCierre || hoy;
+  const ventasDesdeCierre = ventas.filter(v => v.fecha >= fechaDesde);
   
-  const totalHoy = ventasHoy.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-  const totalPropinas = ventasHoy.reduce((acc, v) => acc + (v.propina || 0), 0);
+  const totalHoy = ventasDesdeCierre.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+  const totalPropinas = ventasDesdeCierre.reduce((acc, v) => acc + (v.propina || 0), 0);
   const totalVentasNetas = totalHoy - totalPropinas;
   
-  const totalEfectivo = ventasHoy.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
-  const totalYape = ventasHoy.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
-  const totalPos = ventasHoy.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalEfectivo = ventasDesdeCierre.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalYape = ventasDesdeCierre.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalPos = ventasDesdeCierre.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
   
-  const ventasSalon = ventasHoy.filter(v => v.tipo === "salon").length;
-  const ventasDelivery = ventasHoy.filter(v => v.tipo === "delivery").length;
-  const totalComision = ventasHoy.reduce((acc, v) => acc + (v.comision || 0), 0);
+  const ventasSalon = ventasDesdeCierre.filter(v => v.tipo === "salon").length;
+  const ventasDelivery = ventasDesdeCierre.filter(v => v.tipo === "delivery").length;
+  const totalComision = ventasDesdeCierre.reduce((acc, v) => acc + (v.comision || 0), 0);
 
   const obtenerFechaAnterior = (dias: number) => {
     const fecha = new Date();
@@ -128,7 +156,7 @@ export default function Dashboard() {
 
   const productosMasVendidos = () => {
     const conteo: Record<string, { cantidad: number; nombre: string }> = {};
-    ventasHoy.forEach(venta => {
+    ventasDesdeCierre.forEach(venta => {
       venta.productos?.forEach((p: any) => {
         if (conteo[p.producto?.nombre]) {
           conteo[p.producto.nombre].cantidad += p.cantidad;
@@ -158,11 +186,20 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {mostrarModalCierre && ultimoCierre && (
+        <div className="bg-blue-500 text-white p-3 text-center animate-pulse">
+          <p className="text-sm font-bold">📊 Dashboard activo desde el último cierre: {ultimoCierre}</p>
+        </div>
+      )}
+
       <div className="container mx-auto p-3 md:p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg md:text-xl font-bold text-gray-800">📈 Ventas en Tiempo Real</h2>
             <p className="text-xs md:text-sm text-gray-500">Actualizado: {new Date().toLocaleTimeString()}</p>
+            {ultimoCierre && (
+              <p className="text-xs text-blue-600">Desde cierre: {ultimoCierre}</p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
@@ -173,7 +210,7 @@ export default function Dashboard() {
         <div className="bg-purple-600 text-white p-4 md:p-6 rounded-lg mb-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm opacity-80">Total del Día</p>
+              <p className="text-sm opacity-80">{ultimoCierre ? "Total desde Cierre" : "Total del Día"}</p>
               <p className="text-2xl md:text-4xl font-bold">S/.{totalHoy.toFixed(2)}</p>
             </div>
             <div className="text-right">
@@ -203,7 +240,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-purple-100 p-3 md:p-4 rounded-lg text-center">
             <p className="text-xs md:text-sm text-purple-600">📋 Pedidos</p>
-            <p className="text-lg md:text-2xl font-bold text-purple-800">{ventasHoy.length}</p>
+            <p className="text-lg md:text-2xl font-bold text-purple-800">{ventasDesdeCierre.length}</p>
           </div>
         </div>
 
@@ -250,9 +287,9 @@ export default function Dashboard() {
 
           <div className="bg-white rounded-lg shadow p-4">
             <h3 className="font-bold text-gray-800 mb-3">🕐 Últimas Ventas</h3>
-            {ventasHoy.length > 0 ? (
+            {ventasDesdeCierre.length > 0 ? (
               <div className="space-y-2 max-h-48 overflow-y-auto">
-                {[...ventasHoy]
+                {[...ventasDesdeCierre]
                   .sort((a, b) => b.hora.localeCompare(a.hora))
                   .slice(0, 8)
                   .map((v, idx) => (
@@ -274,7 +311,7 @@ export default function Dashboard() {
 
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="font-bold text-gray-800 mb-3">📋 Detalle de Ventas Recientes</h3>
-          {ventasHoy.length > 0 ? (
+          {ventasDesdeCierre.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-xs md:text-sm">
                 <thead>
@@ -287,7 +324,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {[...ventasHoy]
+                  {[...ventasDesdeCierre]
                     .sort((a, b) => b.hora.localeCompare(a.hora))
                     .slice(0, 15)
                     .map((v, idx) => (
