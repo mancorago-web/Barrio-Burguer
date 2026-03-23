@@ -867,16 +867,25 @@ export default function Ventas() {
               
               return (
                 <>
-                  <div className="bg-purple-100 p-4 rounded mb-4">
-                    <p className="text-purple-800 font-bold">Total del día ({fechaFiltroVentas}): S/.{totalDia.toFixed(2)}</p>
-                    <p className="text-sm text-purple-600">{ventasFiltradas.length} ventas</p>
+                  <div className="bg-purple-100 p-3 md:p-4 rounded mb-4">
+                    <p className="text-purple-800 font-bold text-sm md:text-base">Total del día: S/.{totalDia.toFixed(2)}</p>
+                    <p className="text-xs md:text-sm text-purple-600">{ventasFiltradas.length} ventas</p>
                     {totalPropinas > 0 && (
-                      <p className="text-sm text-green-600">Propinas: S/.{totalPropinas.toFixed(2)}</p>
+                      <p className="text-xs md:text-sm text-green-600">Propinas: S/.{totalPropinas.toFixed(2)}</p>
                     )}
-                    <div className="flex flex-wrap gap-4 mt-2 pt-2 border-t border-purple-200">
-                      <span className="text-sm bg-green-100 px-2 py-1 rounded">💵 Efectivo: <strong>S/.{totalEfectivo.toFixed(2)}</strong></span>
-                      <span className="text-sm bg-orange-100 px-2 py-1 rounded">📱 Yape: <strong>S/.{totalYape.toFixed(2)}</strong></span>
-                      <span className="text-sm bg-blue-100 px-2 py-1 rounded">💳 POS: <strong>S/.{totalPos.toFixed(2)}</strong></span>
+                    <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-purple-200">
+                      <div className="bg-green-100 p-2 rounded text-center">
+                        <p className="text-xs text-green-600">💵 Efectivo</p>
+                        <p className="font-bold text-green-800 text-sm">S/.{totalEfectivo.toFixed(2)}</p>
+                      </div>
+                      <div className="bg-orange-100 p-2 rounded text-center">
+                        <p className="text-xs text-orange-600">📱 Yape</p>
+                        <p className="font-bold text-orange-800 text-sm">S/.{totalYape.toFixed(2)}</p>
+                      </div>
+                      <div className="bg-blue-100 p-2 rounded text-center">
+                        <p className="text-xs text-blue-600">💳 POS</p>
+                        <p className="font-bold text-blue-800 text-sm">S/.{totalPos.toFixed(2)}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -884,58 +893,35 @@ export default function Ventas() {
                     <p className="text-gray-500 text-center py-4">No hay ventas en esta fecha.</p>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-xs md:text-sm">
                         <thead>
                           <tr className="bg-gray-200">
-                            <th className="p-2 text-left">Hora</th>
-                            <th className="p-2 text-left">Tipo</th>
-                            <th className="p-2 text-left">Mesa</th>
-                            <th className="p-2 text-left">Productos</th>
-                            <th className="p-2 text-right">Total</th>
-                            <th className="p-2 text-right">Propina</th>
-                            <th className="p-2 text-left">Método</th>
-                            <th className="p-2 text-left">Usuario</th>
+                            <th className="p-1 md:p-2 text-left">Hora</th>
+                            <th className="p-1 md:p-2 text-left hidden sm:table-cell">Tipo</th>
+                            <th className="p-1 md:p-2 text-left">Mesa</th>
+                            <th className="p-1 md:p-2 text-right">Total</th>
+                            <th className="p-1 md:p-2 text-left hidden md:table-cell">Método</th>
                           </tr>
                         </thead>
                         <tbody>
                           {ventasFiltradas.map((v, idx) => (
                             <tr key={idx} className="border-b">
-                              <td className="p-2">{v.hora}</td>
-                              <td className="p-2">
-                                <span className={`px-2 py-1 rounded text-white text-xs ${v.tipo === "salon" ? "bg-blue-500" : "bg-orange-500"}`}>
+                              <td className="p-1 md:p-2">{v.hora}</td>
+                              <td className="p-1 md:p-2 hidden sm:table-cell">
+                                <span className={`px-1 md:px-2 py-0.5 md:py-1 rounded text-white text-xs ${v.tipo === "salon" ? "bg-blue-500" : "bg-orange-500"}`}>
                                   {v.tipo === "salon" ? "Salón" : "Delivery"}
                                 </span>
                               </td>
-                              <td className="p-2">{v.mesa || "-"}</td>
-                              <td className="p-2">
-                                {v.productos?.map((p: any, i: number) => (
-                                  <span key={i} className="text-xs">
-                                    {p.cantidad}x{p.producto?.nombre}{i < v.productos.length - 1 ? ", " : ""}
-                                  </span>
-                                ))}
-                              </td>
-                              <td className="p-2 text-right font-bold">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</td>
-                              <td className="p-2 text-right text-green-600 font-bold">
-                                {v.propina > 0 ? `S/.${v.propina.toFixed(2)}` : "-"}
-                              </td>
-                              <td className="p-2">
-                                <span className={`px-2 py-1 rounded text-white text-xs ${
+                              <td className="p-1 md:p-2">{v.mesa || "-"}</td>
+                              <td className="p-1 md:p-2 text-right font-bold">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</td>
+                              <td className="p-1 md:p-2 hidden md:table-cell">
+                                <span className={`px-1 md:px-2 py-0.5 md:py-1 rounded text-white text-xs ${
                                   v.metodoPago === "efectivo" ? "bg-green-500" : 
                                   v.metodoPago === "yape" ? "bg-orange-500" : 
                                   "bg-blue-500"
                                 }`}>
                                   {v.metodoPago === "efectivo" ? "Efectivo" : 
                                    v.metodoPago === "yape" ? "Yape" : "POS"}
-                                </span>
-                              </td>
-                              <td className="p-2">
-                                <span className={`px-2 py-1 rounded text-white text-xs ${
-                                  v.usuario?.toLowerCase() === "admin" ? "bg-purple-600" : 
-                                  v.usuario?.toLowerCase() === "cubas" ? "bg-orange-500" : 
-                                  v.usuario?.toLowerCase() === "cocina1" ? "bg-blue-600" : 
-                                  "bg-gray-500"
-                                }`}>
-                                  {v.usuario || "-"}
                                 </span>
                               </td>
                             </tr>
