@@ -895,6 +895,44 @@ export default function Ventas() {
                         </>
                       );
                     })()}
+
+                    <div className="mt-8 border-t pt-6">
+                      <h3 className="text-lg font-bold mb-4">📋 Conteo de Items</h3>
+                      
+                      {(() => {
+                        const conteoItems: Record<string, number> = {};
+                        
+                        ventasFiltradas.forEach(venta => {
+                          venta.productos?.forEach((item: any) => {
+                            const nombreProducto = item.producto?.nombre || "Sin nombre";
+                            if (conteoItems[nombreProducto]) {
+                              conteoItems[nombreProducto] += item.cantidad;
+                            } else {
+                              conteoItems[nombreProducto] = item.cantidad;
+                            }
+                          });
+                        });
+                        
+                        const itemsOrdenados = Object.entries(conteoItems).sort((a, b) => b[1] - a[1]);
+                        
+                        return (
+                          <>
+                            {itemsOrdenados.length > 0 ? (
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                {itemsOrdenados.map(([nombre, cantidad]) => (
+                                  <div key={nombre} className="bg-gray-100 p-3 rounded-lg text-center">
+                                    <p className="font-medium text-sm truncate">{nombre}</p>
+                                    <p className="text-xl font-bold text-green-600">{cantidad}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-center py-4">No hay items vendidos en esta fecha.</p>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </>
               );
