@@ -786,7 +786,7 @@ export default function Ventas() {
                     <h3 className="text-lg font-bold mb-4">📦 Consumo y Costos</h3>
                     
                     {(() => {
-                      const consumo: Record<string, { nombre: string; unidad: string; cantidad: number; costoUnitario: number; stockActual: number }> = {};
+                      const consumo: Record<string, { nombre: string; unidad: string; cantidad: number; costoUnitario: number }> = {};
                       
                       ventasFiltradas.forEach(venta => {
                         venta.productos?.forEach((item: any) => {
@@ -811,8 +811,7 @@ export default function Ventas() {
                                 nombre: insumo.nombre,
                                 unidad: insumo.unidad || "und",
                                 cantidad: cantidadConsumida,
-                                costoUnitario: insumo.precioCompra || 0,
-                                stockActual: insumo.stockActual || 0
+                                costoUnitario: insumo.precioCompra || 0
                               };
                             }
                           });
@@ -849,30 +848,20 @@ export default function Ventas() {
                                 <thead>
                                   <tr className="bg-gray-200">
                                     <th className="p-1 md:p-2 text-left">Insumo</th>
-                                    <th className="p-1 md:p-2 text-right hidden sm:table-cell">Stock</th>
                                     <th className="p-1 md:p-2 text-right">Consumido</th>
-                                    <th className="p-1 md:p-2 text-right hidden md:table-cell">Nuevo</th>
-                                    <th className="p-1 md:p-2 text-right">Costo</th>
+                                    <th className="p-1 md:p-2 text-right">Costo Unit.</th>
+                                    <th className="p-1 md:p-2 text-right">Total</th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {consumoArray.map(([id, item]: [string, any]) => {
-                                    const nuevoStock = item.stockActual - item.cantidad;
-                                    const esBajoStock = nuevoStock < (inventario.find((i: any) => i.id === Number(id))?.stockMinimo || 0);
-                                    return (
-                                      <tr key={id} className={`border-b ${esBajoStock ? "bg-red-50" : ""}`}>
+                                  {consumoArray.map(([id, item]: [string, any]) => (
+                                      <tr key={id} className="border-b">
                                         <td className="p-2 font-medium">{item.nombre}</td>
-                                        <td className="p-2 text-right">{item.stockActual.toFixed(2)} {item.unidad}</td>
-                                        <td className="p-2 text-right text-red-600">-{item.cantidad.toFixed(2)} {item.unidad}</td>
-                                        <td className={`p-2 text-right font-bold ${esBajoStock ? "text-red-600" : "text-green-600"}`}>
-                                          {nuevoStock.toFixed(2)} {item.unidad}
-                                          {esBajoStock && " ⚠️"}
-                                        </td>
+                                        <td className="p-2 text-right text-red-600">{item.cantidad.toFixed(2)} {item.unidad}</td>
                                         <td className="p-2 text-right">S/.{item.costoUnitario.toFixed(2)}</td>
                                         <td className="p-2 text-right">S/.{(item.cantidad * item.costoUnitario).toFixed(2)}</td>
                                       </tr>
-                                    );
-                                  })}
+                                  ))}
                                 </tbody>
                               </table>
                             </div>
