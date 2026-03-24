@@ -1007,7 +1007,7 @@ export default function Caja() {
                               <tbody>
                                 {comprasFiltradas.map((c, idx) => (
                                   <tr key={idx} className="border-b">
-                                    <td className="p-2">{c.producto || "-"}</td>
+                                    <td className="p-2">{c.productoNombre || c.producto || "-"}</td>
                                     <td className="p-2 text-right">{c.cantidad || 0}</td>
                                     <td className="p-2 text-right hidden sm:table-cell">S/.{(c.precioUnitario || 0).toFixed(2)}</td>
                                     <td className="p-2 text-right font-bold">S/.{(c.total || 0).toFixed(2)}</td>
