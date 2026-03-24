@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import * as XLSX from "xlsx";
 
 interface ProductoVenta {
   id: number;
@@ -684,14 +685,37 @@ export default function Ventas() {
           <div className="bg-white rounded-lg shadow p-3 md:p-4">
             <h2 className="text-base md:text-lg font-bold mb-3 md:mb-4">📊 Registro de Ventas</h2>
             
-            <div className="flex items-center gap-2 mb-3 md:mb-4">
+            <div className="flex flex-wrap items-center gap-2 mb-3 md:mb-4">
               <label className="text-xs md:text-sm font-bold">Fecha:</label>
               <input 
                 type="date" 
-                className="border p-2 rounded text-sm flex-1"
+                className="border p-2 rounded text-sm"
                 value={fechaFiltroVentas}
                 onChange={(e) => setFechaFiltroVentas(e.target.value)}
               />
+              <button
+                onClick={() => {
+                  const ventasFiltradas = [...ventas.filter(v => v.fecha === fechaFiltroVentas)];
+                  const dataExport = ventasFiltradas.map((v, index) => ({
+                    "#": index + 1,
+                    "Hora": v.hora || "-",
+                    "Mesa": v.mesa || v.tipo || "-",
+                    "Subtotal": v.total || 0,
+                    "Propina": v.propina || 0,
+                    "Total": v.totalConPropina || v.total || 0,
+                    "Método": v.metodoPago === "efectivo" ? "Efectivo" : v.metodoPago === "yape" ? "Yape" : v.metodoPago === "pos" ? "POS" : v.metodoPago || "-",
+                    "Usuario": v.usuario || "-",
+                    "Productos": v.productos?.map((p: any) => `${p.cantidad}x ${p.producto?.nombre || "N/A"}`).join(", ") || "-"
+                  }));
+                  const ws = XLSX.utils.json_to_sheet(dataExport);
+                  const wb = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(wb, ws, "Ventas");
+                  XLSX.writeFile(wb, `Ventas_${fechaFiltroVentas}.xlsx`);
+                }}
+                className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
+              >
+                📥 Exportar
+              </button>
             </div>
 
             {(() => {
