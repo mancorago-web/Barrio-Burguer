@@ -109,7 +109,7 @@ export async function getFreshServerDate(): Promise<{ fecha: string; hora: strin
   }
 }
 
-export async function updateServerTime(): Promise<void> {
+export async function updateServerTime(): Promise<{ timestamp: number }> {
   try {
     const ref = doc(db, "_serverTime", "timestamp");
     const now = Date.now();
@@ -122,8 +122,11 @@ export async function updateServerTime(): Promise<void> {
     cachedDate = fecha;
     cachedTimestamp = now;
     lastFetchTime = now;
+    
+    return { timestamp: now };
   } catch (error) {
     console.error("Error updating server time:", error);
+    return { timestamp: Date.now() };
   }
 }
 
