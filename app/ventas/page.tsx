@@ -250,11 +250,8 @@ export default function Ventas() {
       const ventasSnap = await getDoc(ventasRef);
       const pedidosAnteriores = ventasSnap.exists() ? ventasSnap.data().pedidos || [] : [];
       
-      await import("firebase/firestore").then(async ({ setDoc }) => {
-        await setDoc(ventasRef, { pedidos: [nuevoPedido, ...pedidosAnteriores] }, { merge: true });
-      });
+      await setDoc(ventasRef, { pedidos: [nuevoPedido, ...pedidosAnteriores] }, { merge: true });
       
-      // Registrar propina como egreso si existe
       if (propina > 0) {
         const egresosRef = doc(db, "caja", "egresos");
         const egresosSnap = await getDoc(egresosRef);
