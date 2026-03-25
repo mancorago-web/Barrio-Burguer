@@ -203,12 +203,17 @@ export default function Ventas() {
       const ventasSnap = await getDoc(ventasRef);
       const pedidosAnteriores = ventasSnap.exists() ? ventasSnap.data().pedidos || [] : [];
       
-      const pedidosFiltrados = pedidosAnteriores.filter((p: any) => p.id !== id);
+      const pedidosActualizados = pedidosAnteriores.map((p: any) => {
+        if (p.id === id) {
+          return { ...p, eliminado: true, fechaEliminacion: new Date().toISOString() };
+        }
+        return p;
+      });
       
-      await setDoc(ventasRef, { pedidos: pedidosFiltrados }, { merge: true });
+      await setDoc(ventasRef, { pedidos: pedidosActualizados }, { merge: true });
       
-      setVentas(pedidosFiltrados);
-      alert("Venta eliminada correctamente");
+      setVentas(pedidosActualizados);
+      alert("Venta marcada como eliminada");
     } catch (error) {
       console.error("Error eliminando venta:", error);
       alert("Error al eliminar la venta");
@@ -706,8 +711,8 @@ export default function Ventas() {
               />
               <button
                 onClick={() => {
-                  const ventasFiltradas = [...ventas.filter(v => v.fecha === fechaFiltroVentas)];
-                  const dataExport = ventasFiltradas.map((v, index) => ({
+                  const ventasParaExportar = [...ventas.filter(v => v.fecha === fechaFiltroVentas && !v.eliminado)];
+                  const dataExport = ventasParaExportar.map((v, index) => ({
                     "#": index + 1,
                     "Hora": v.hora || "-",
                     "Mesa": v.mesa || v.tipo || "-",
@@ -738,17 +743,23 @@ export default function Ventas() {
                   const bMinutes = bTime[0] * 60 + bTime[1];
                   return bMinutes - aMinutes;
                 });
-              const totalDia = ventasFiltradas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-              const totalPropinas = ventasFiltradas.reduce((acc, v) => acc + (v.propina || 0), 0);
-              const totalEfectivo = ventasFiltradas.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-              const totalYape = ventasFiltradas.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-              const totalPos = ventasFiltradas.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const ventasActivas = ventasFiltradas.filter(v => !v.eliminado);
+              const totalDia = ventasActivas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const totalPropinas = ventasActivas.reduce((acc, v) => acc + (v.propina || 0), 0);
+              const totalEfectivo = ventasActivas.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const totalYape = ventasActivas.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const totalPos = ventasActivas.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const ventasEliminadas = ventasFiltradas.filter(v => v.eliminado);
+              const totalEliminadas = ventasEliminadas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
               
               return (
                 <>
                   <div className="bg-purple-100 p-3 md:p-4 rounded mb-4">
                     <p className="text-purple-800 font-bold text-sm md:text-base">Total del día: S/.{totalDia.toFixed(2)}</p>
-                    <p className="text-xs md:text-sm text-purple-600">{ventasFiltradas.length} ventas</p>
+                    <p className="text-xs md:text-sm text-purple-600">{ventasActivas.length} ventas</p>
+                    {ventasEliminadas.length > 0 && (
+                      <p className="text-xs md:text-sm text-red-500">({ventasEliminadas.length} eliminadas: S/.{totalEliminadas.toFixed(2)})</p>
+                    )}
                     {totalPropinas > 0 && (
                       <p className="text-xs md:text-sm text-green-600">Propinas: S/.{totalPropinas.toFixed(2)}</p>
                     )}
@@ -773,24 +784,33 @@ export default function Ventas() {
                   ) : (
                     <div className="space-y-2">
                       {ventasFiltradas.map((v, idx) => (
-                        <div key={idx} className="bg-white border rounded-lg p-3">
+                        <div key={idx} className={`border rounded-lg p-3 ${v.eliminado ? "bg-gray-100 border-gray-400 opacity-60" : "bg-white"}`}>
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-bold">{v.hora}</span>
-                                <span className={`px-2 py-0.5 rounded text-white text-xs ${v.tipo === "salon" ? "bg-blue-500" : "bg-orange-500"}`}>
-                                  {v.tipo === "salon" ? "Salón" : "Delivery"}
-                                </span>
-                                <span className="font-medium">{v.mesa}</span>
-                                <span className={`px-2 py-0.5 rounded text-white text-xs ${
-                                  v.metodoPago === "efectivo" ? "bg-green-500" : 
-                                  v.metodoPago === "yape" ? "bg-orange-500" : 
-                                  "bg-blue-500"
-                                }`}>
-                                  {v.metodoPago === "efectivo" ? "Efectivo" : v.metodoPago === "yape" ? "Yape" : "POS"}
-                                </span>
-                                {v.propina > 0 && (
-                                  <span className="text-xs text-green-600">+Propina</span>
+                                {v.eliminado && (
+                                  <span className="px-2 py-0.5 rounded text-white text-xs bg-gray-500">
+                                    ELIMINADO
+                                  </span>
+                                )}
+                                {!v.eliminado && (
+                                  <>
+                                    <span className={`px-2 py-0.5 rounded text-white text-xs ${v.tipo === "salon" ? "bg-blue-500" : "bg-orange-500"}`}>
+                                      {v.tipo === "salon" ? "Salón" : "Delivery"}
+                                    </span>
+                                    <span className="font-medium">{v.mesa}</span>
+                                    <span className={`px-2 py-0.5 rounded text-white text-xs ${
+                                      v.metodoPago === "efectivo" ? "bg-green-500" : 
+                                      v.metodoPago === "yape" ? "bg-orange-500" : 
+                                      "bg-blue-500"
+                                    }`}>
+                                      {v.metodoPago === "efectivo" ? "Efectivo" : v.metodoPago === "yape" ? "Yape" : "POS"}
+                                    </span>
+                                    {v.propina > 0 && (
+                                      <span className="text-xs text-green-600">+Propina</span>
+                                    )}
+                                  </>
                                 )}
                               </div>
                               <div className="mt-2 text-sm text-gray-600">
@@ -803,13 +823,19 @@ export default function Ventas() {
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2 ml-2">
-                              <span className="font-bold text-green-600">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
-                              <button
-                                onClick={() => eliminarVenta(v.id)}
-                                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                              >
-                                ✕ Eliminar
-                              </button>
+                              {v.eliminado ? (
+                                <span className="font-bold text-gray-500 line-through">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
+                              ) : (
+                                <>
+                                  <span className="font-bold text-green-600">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
+                                  <button
+                                    onClick={() => eliminarVenta(v.id)}
+                                    className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                                  >
+                                    ✕ Eliminar
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -823,7 +849,7 @@ export default function Ventas() {
                     {(() => {
                       const consumo: Record<string, { nombre: string; unidad: string; cantidad: number; costoUnitario: number }> = {};
                       
-                      ventasFiltradas.forEach(venta => {
+                      ventasActivas.forEach(venta => {
                         venta.productos?.forEach((item: any) => {
                           const productoVentaId = item.producto?.id;
                           const cantidadVendida = item.cantidad;
@@ -913,7 +939,7 @@ export default function Ventas() {
                       {(() => {
                         const conteoItems: Record<string, number> = {};
                         
-                        ventasFiltradas.forEach(venta => {
+                        ventasActivas.forEach(venta => {
                           venta.productos?.forEach((item: any) => {
                             const nombreProducto = item.producto?.nombre || "Sin nombre";
                             if (conteoItems[nombreProducto]) {
