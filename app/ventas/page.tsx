@@ -142,7 +142,8 @@ export default function Ventas() {
 
   useEffect(() => {
     if (vista === "registro") {
-      setFechaFiltroVentas(new Date().toISOString().split("T")[0]);
+      const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+      setFechaFiltroVentas(formatter.format(new Date()));
       cargarVentas();
     }
   }, [vista]);
