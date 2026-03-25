@@ -334,6 +334,7 @@ export default function Caja() {
     });
 
     mensaje += `%0A*TOTAL: S/.${total.toFixed(2)}*`;
+    mensaje += `%0A%0A💵 *CAJA ACTUAL: S/.${montoInicialGuardado.toFixed(2)}*`;
     mensaje += `%0A%0AEnviado por: ${nombreUsuario}`;
 
     window.open(`https://wa.me/?text=${mensaje}`, "_blank");
