@@ -413,7 +413,8 @@ export default function Caja() {
     try {
       const comprasRef = doc(db, "compras", "registros");
       const comprasSnap = await getDoc(comprasRef);
-      const hoy = new Date().toISOString().split("T")[0];
+  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+  const hoy = formatter.format(new Date());
       if (comprasSnap.exists()) {
         const comprasData = comprasSnap.data().compras || [];
         setCompras(comprasData);
@@ -601,10 +602,11 @@ export default function Caja() {
   }
 
   const enviarCierreWhatsApp = () => {
-    const hoy = new Date().toISOString().split("T")[0];
-    const comprasHoy = compras.filter(c => c.fecha === hoy);
+    const whatsappFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+    const hoyWhatsapp = whatsappFormatter.format(new Date());
+    const comprasHoy = compras.filter(c => c.fecha === hoyWhatsapp);
     const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
-    const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
+    const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoyWhatsapp || v.fecha === hoyWhatsapp);
     const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
     const ventasYape = ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
     const ventasPOS = ventasHoy.filter((v: any) => v.metodoPago === "pos" || v.metodoPago === "tarjeta").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
@@ -612,7 +614,7 @@ export default function Caja() {
     const efectivoCaja = montoInicialGuardado + inyeccionCompras + ventasEfectivo - totalCompras - totalEgresos;
     
     const mensaje = `🔒 *CIERRE DEL DÍA*%0A%0A` +
-      `📅 Fecha: ${hoy}%0A` +
+      `📅 Fecha: ${hoyWhatsapp}%0A` +
       `👤 Usuario: ${nombreUsuario}%0A%0A` +
       `💵 *RESUMEN DE CAJA*%0A` +
       `• Monto Inicial: S/.${montoInicialGuardado.toFixed(2)}%0A` +
