@@ -249,7 +249,8 @@ export default function Ventas() {
       metodoPago,
       montoRecibido: metodoPago === "efectivo" ? montoRecibido : totalFinal,
       cambio: metodoPago === "efectivo" ? montoRecibido - totalFinal : 0,
-      fechaCierre: null
+      fechaCierre: null,
+      propina: getTotalConPropina() - getTotal()
     };
       const ventasRef = doc(db, "ventas", "pedidos");
       const ventasSnap = await getDoc(ventasRef);
