@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [verificando, setVerificando] = useState(true);
   const [rol, setRol] = useState<string | null>(null);
   const [ventas, setVentas] = useState<Venta[]>([]);
+  const [egresos, setEgresos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [ultimoCierre, setUltimoCierre] = useState<string | null>(null);
   const [mostrarModalCierre, setMostrarModalCierre] = useState(false);
@@ -60,6 +61,7 @@ export default function Dashboard() {
 
     const ventasRef = doc(db, "ventas", "pedidos");
     const configRef = doc(db, "ventas", "config");
+    const egresosRef = doc(db, "caja", "egresos");
     
     const unsubscribeVentas = onSnapshot(ventasRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -80,9 +82,17 @@ export default function Dashboard() {
       }
     });
 
+    const unsubscribeEgresos = onSnapshot(egresosRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.data();
+        setEgresos(data.egresos || []);
+      }
+    });
+
     return () => {
       unsubscribeVentas();
       unsubscribeConfig();
+      unsubscribeEgresos();
     };
   }, [verificando]);
 
@@ -133,9 +143,11 @@ export default function Dashboard() {
   const ventasDelDia = ventas.filter(v => v.fecha === hoy);
   const ventasActivas = ventasDelDia.filter(v => !v.eliminado);
   const ventasEliminadas = ventasDelDia.filter(v => v.eliminado);
+  const egresosActivos = egresos.filter(e => !e.eliminado && e.fecha === hoy);
+  const propinasDelDia = egresosActivos.filter(e => e.tipo === "propina");
   
   const totalHoy = ventasActivas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-  const totalPropinas = ventasActivas.reduce((acc, v) => acc + (v.propina || 0), 0);
+  const totalPropinas = propinasDelDia.reduce((acc, e) => acc + e.monto, 0);
   const totalVentasNetas = totalHoy - totalPropinas;
   const totalEliminadas = ventasEliminadas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
   
