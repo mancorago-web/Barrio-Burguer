@@ -50,34 +50,33 @@ export default function Caja() {
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(new Date().toISOString().split("T")[0]);
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
-  const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split("T")[0]);
+  const [fechaFiltro, setFechaFiltro] = useState("");
+  const [fechaFiltroInyeccion, setFechaFiltroInyeccion] = useState("");
+  const [fechaFiltroCompras, setFechaFiltroCompras] = useState("");
+  const [nombreUsuario, setNombreUsuario] = useState("");
+  const [nuevaCompraProducto, setNuevaCompraProducto] = useState("");
+  const [nuevaCompraCantidad, setNuevaCompraCantidad] = useState(0);
+  const [nuevaCompraPrecio, setNuevaCompraPrecio] = useState(0);
+  const [modalCierreDia, setModalCierreDia] = useState(false);
+  const [ventasDelDia, setVentasDelDia] = useState<any[]>([]);
+  const [modalRegistroCierres, setModalRegistroCierres] = useState(false);
+  const [cierresAnteriores, setCierresAnteriores] = useState<any[]>([]);
   const [montoInicial, setMontoInicial] = useState(0);
-  const [montoFinal, setMontoFinal] = useState(0);
   const [montoInicialGuardado, setMontoInicialGuardado] = useState(0);
   const [ultimaActualizacion, setUltimaActualizacion] = useState<string | null>(null);
   const [inyeccionMonto, setInyeccionMonto] = useState(0);
   const [inyeccionCompras, setInyeccionCompras] = useState(0);
   const [gastoCompras, setGastoCompras] = useState(0);
-  const [inyecciones, setInyecciones] = useState<InyeccionCaja[]>([]);
   const [inyeccionUltimaActualizacion, setInyeccionUltimaActualizacion] = useState<string | null>(null);
   const [mostrarRegistroInyeccion, setMostrarRegistroInyeccion] = useState(false);
-  const [fechaFiltroInyeccion, setFechaFiltroInyeccion] = useState(new Date().toISOString().split("T")[0]);
   const [notificacion, setNotificacion] = useState<string | null>(null);
   const [productosPorPedir, setProductosPorPedir] = useState<ProductoPorPedir[]>([]);
   const [ultimaActualizacionLista, setUltimaActualizacionLista] = useState<string | null>(null);
   const [compras, setCompras] = useState<any[]>([]);
   const [mostrarRegistroCompras, setMostrarRegistroCompras] = useState(false);
-  const [fechaFiltroCompras, setFechaFiltroCompras] = useState(new Date().toISOString().split("T")[0]);
-  const [nombreUsuario, setNombreUsuario] = useState("");
-  const [nuevaCompraProducto, setNuevaCompraProducto] = useState("");
-  const [nuevaCompraCantidad, setNuevaCompraCantidad] = useState(0);
-  const [nuevaCompraPrecio, setNuevaCompraPrecio] = useState(0);
+  const [inyecciones, setInyecciones] = useState<InyeccionCaja[]>([]);
   const [modalRegistrarCompra, setModalRegistrarCompra] = useState(false);
   const [comprasARegistrar, setComprasARegistrar] = useState<Record<string, number>>({});
-  const [modalCierreDia, setModalCierreDia] = useState(false);
-  const [ventasDelDia, setVentasDelDia] = useState<any[]>([]);
-  const [modalRegistroCierres, setModalRegistroCierres] = useState(false);
-  const [cierresAnteriores, setCierresAnteriores] = useState<any[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -118,6 +117,14 @@ export default function Caja() {
       }
     };
     cargarDatos();
+  }, []);
+
+  useEffect(() => {
+    const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+    const localDate = formatter.format(new Date());
+    setFechaFiltro(localDate);
+    setFechaFiltroInyeccion(localDate);
+    setFechaFiltroCompras(localDate);
   }, []);
 
   useEffect(() => {
