@@ -42,6 +42,7 @@ export default function Ventas() {
   const [pedidosAbiertos, setPedidosAbiertos] = useState<any[]>([]);
   const [recetas, setRecetas] = useState<any[]>([]);
   const [inventario, setInventario] = useState<any[]>([]);
+  const [guardandoPedido, setGuardandoPedido] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -221,7 +222,9 @@ export default function Ventas() {
   };
 
   const guardarPedido = async () => {
-    if (pedido.length === 0) return;
+    if (pedido.length === 0 || guardandoPedido) return;
+    
+    setGuardandoPedido(true);
     
     const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
@@ -340,6 +343,8 @@ export default function Ventas() {
       cargarPedidosAbiertos();
     } catch (error) {
       console.error("Error guardando pedido:", error);
+    } finally {
+      setGuardandoPedido(false);
     }
   };
 
@@ -1117,10 +1122,10 @@ export default function Ventas() {
               </button>
               <button 
                 onClick={guardarPedido}
-                disabled={metodoPago === "efectivo" && montoRecibido < (mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina())}
-                className={`flex-1 py-2 rounded ${metodoPago === "efectivo" && montoRecibido < (mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina()) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700"}`}
+                disabled={guardandoPedido || (metodoPago === "efectivo" && montoRecibido < (mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina()))}
+                className={`flex-1 py-2 rounded flex items-center justify-center gap-2 ${guardandoPedido || (metodoPago === "efectivo" && montoRecibido < (mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina())) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700"}`}
               >
-                Confirmar Pago
+                {guardandoPedido ? "Guardando..." : "Confirmar Pago"}
               </button>
             </div>
           </div>

@@ -77,6 +77,8 @@ export default function Caja() {
   const [compras, setCompras] = useState<any[]>([]);
   const [mostrarRegistroCompras, setMostrarRegistroCompras] = useState(false);
   const [inyecciones, setInyecciones] = useState<InyeccionCaja[]>([]);
+  const [guardandoEgreso, setGuardandoEgreso] = useState(false);
+  const [guardandoCompra, setGuardandoCompra] = useState(false);
   const [modalRegistrarCompra, setModalRegistrarCompra] = useState(false);
   const [comprasARegistrar, setComprasARegistrar] = useState<Record<string, number>>({});
 
@@ -442,7 +444,8 @@ export default function Caja() {
   };
 
   const registrarCompra = async () => {
-    if (!nuevaCompraProducto || nuevaCompraCantidad <= 0 || nuevaCompraPrecio <= 0) return;
+    if (!nuevaCompraProducto || nuevaCompraCantidad <= 0 || nuevaCompraPrecio <= 0 || guardandoCompra) return;
+    setGuardandoCompra(true);
 
     const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
@@ -468,6 +471,8 @@ export default function Caja() {
       setTimeout(() => setNotificacion(null), 3000);
     } catch (error) {
       console.error("Error guardando compra:", error);
+    } finally {
+      setGuardandoCompra(false);
     }
 
     setNuevaCompraProducto("");
@@ -543,7 +548,8 @@ export default function Caja() {
   };
 
   const guardarEgreso = async () => {
-    if (monto <= 0) return;
+    if (monto <= 0 || guardandoEgreso) return;
+    setGuardandoEgreso(true);
 
     const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
@@ -567,6 +573,8 @@ export default function Caja() {
       });
     } catch (error) {
       console.error("Error guardando egreso:", error);
+    } finally {
+      setGuardandoEgreso(false);
     }
 
     setModalAbierto(false);
@@ -1329,9 +1337,10 @@ export default function Caja() {
             <div className="flex gap-2">
               <button 
                 onClick={registrarCompras}
-                className="flex-1 bg-orange-600 text-white py-2 rounded hover:bg-orange-700"
+                disabled={guardandoCompra}
+                className={`flex-1 py-2 rounded ${guardandoCompra ? "bg-gray-400 cursor-not-allowed" : "bg-orange-600 text-white hover:bg-orange-700"}`}
               >
-                Registrar Compra
+                {guardandoCompra ? "Guardando..." : "Registrar Compra"}
               </button>
               <button 
                 onClick={() => setModalRegistrarCompra(false)}
@@ -1596,9 +1605,10 @@ export default function Caja() {
             <div className="flex gap-2">
               <button 
                 onClick={guardarEgreso}
-                className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                disabled={guardandoEgreso}
+                className={`flex-1 py-2 rounded ${guardandoEgreso ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700"}`}
               >
-                Guardar
+                {guardandoEgreso ? "Guardando..." : "Guardar"}
               </button>
               <button 
                 onClick={() => setModalAbierto(false)}

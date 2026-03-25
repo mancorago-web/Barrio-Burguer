@@ -41,6 +41,7 @@ function InventarioContent() {
   const [fechaFiltro, setFechaFiltro] = useState(new Date().toISOString().split("T")[0]);
   const [ultimaActualizacion, setUltimaActualizacion] = useState<string | null>(null);
   const [nombreUsuario, setNombreUsuario] = useState<string>("");
+  const [guardandoInventario, setGuardandoInventario] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -163,6 +164,9 @@ function InventarioContent() {
   };
 
   const enviarInventario = async () => {
+    if (guardandoInventario) return;
+    setGuardandoInventario(true);
+    
     const ahora = new Date();
     const fechaActualizada = `${ahora.toLocaleDateString()} ${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
     const actualizacionCompleta = `${fechaActualizada} - ${nombreUsuario}`;
@@ -204,6 +208,8 @@ function InventarioContent() {
       setUltimaActualizacion(actualizacionCompleta);
       setTipoNotificacion("verde");
       setNotificacion("Guardado en navegador (Firebase no disponible)");
+    } finally {
+      setGuardandoInventario(false);
     }
     window.scrollTo(0, 0);
     setTimeout(() => setNotificacion(null), 4000);
@@ -491,9 +497,10 @@ function InventarioContent() {
             <div className="flex justify-end mt-4">
               <button 
                 onClick={enviarInventario}
-                className="px-6 py-2 rounded text-white font-bold bg-green-600 hover:bg-green-700"
+                disabled={guardandoInventario}
+                className={`px-6 py-2 rounded text-white font-bold ${guardandoInventario ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
               >
-                ENVIAR
+                {guardandoInventario ? "Guardando..." : "ENVIAR"}
               </button>
             </div>
           </div>
