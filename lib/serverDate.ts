@@ -1,5 +1,5 @@
 import { db } from "@/app/firebase";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 let cachedDate: string | null = null;
 let cachedTimestamp: number | null = null;
@@ -51,6 +51,37 @@ export async function getServerDate(): Promise<{ fecha: string; hora: string; ti
       fecha: cachedDate,
       hora: fallbackDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
       timestamp: cachedTimestamp
+    };
+  }
+}
+
+export async function getFreshServerDate(): Promise<{ fecha: string; hora: string; timestamp: number }> {
+  try {
+    const ref = doc(db, "_serverTime", "timestamp");
+    const snap = await getDoc(ref);
+    
+    let serverTime: number;
+    
+    if (snap.exists() && snap.data().timestamp) {
+      serverTime = snap.data().timestamp;
+    } else {
+      serverTime = Date.now();
+      await setDoc(ref, { timestamp: serverTime, updatedAt: new Date().toISOString() });
+    }
+    
+    const serverDate = new Date(serverTime);
+    
+    return {
+      fecha: serverDate.toISOString().split("T")[0],
+      hora: serverDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
+      timestamp: serverTime
+    };
+  } catch {
+    const fallbackDate = new Date();
+    return {
+      fecha: fallbackDate.toISOString().split("T")[0],
+      hora: fallbackDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
+      timestamp: fallbackDate.getTime()
     };
   }
 }
