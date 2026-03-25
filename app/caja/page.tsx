@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { getServerDate } from "@/lib/serverDate";
+import { getFreshServerDate } from "@/lib/serverDate";
 
 type TipoEgreso = "egreso" | "propina";
 
@@ -350,7 +350,7 @@ export default function Caja() {
 
       const datos = docSnap.data();
       let productos = datos.productos || [];
-      const serverDate = await getServerDate();
+      const serverDate = await getFreshServerDate();
       const { fecha, hora } = serverDate;
       const fechaActualizada = `${fecha} ${hora}`;
 
@@ -433,7 +433,7 @@ export default function Caja() {
   const registrarCompra = async () => {
     if (!nuevaCompraProducto || nuevaCompraCantidad <= 0 || nuevaCompraPrecio <= 0) return;
 
-    const serverDate = await getServerDate();
+    const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
 
     const nuevaCompra: any = {
@@ -492,7 +492,7 @@ export default function Caja() {
   const guardarInyeccion = async () => {
     if (inyeccionMonto <= 0) return;
 
-    const serverDate = await getServerDate();
+    const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
     const fechaHora = `${fecha} ${hora}`;
 
@@ -534,7 +534,7 @@ export default function Caja() {
   const guardarEgreso = async () => {
     if (monto <= 0) return;
 
-    const serverDate = await getServerDate();
+    const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
 
     const nuevoEgreso: Egreso = {
@@ -625,7 +625,7 @@ export default function Caja() {
   };
 
   const guardarCierreDia = async () => {
-    const serverDate = await getServerDate();
+    const serverDate = await getFreshServerDate();
     const hoy = serverDate.fecha;
     const hora = serverDate.hora;
     
