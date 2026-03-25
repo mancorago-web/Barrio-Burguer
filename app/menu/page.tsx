@@ -50,7 +50,7 @@ export default function Menu() {
       <header className="bg-orange-600 text-white p-3 md:p-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-lg md:text-2xl font-bold text-center">
-            🍔 Barrio Burguer
+            🍔 Barrio Burger
           </h1>
           <button 
             onClick={cerrarSesion}
