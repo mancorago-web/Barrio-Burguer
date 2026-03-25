@@ -426,24 +426,24 @@ function InventarioContent() {
                 </h3>
                 {categoriasExpandidas[cat] && (
                   <div className="overflow-x-auto border border-t-0">
-                  <table className="w-full text-xs">
+                  <table className="w-full text-xs md:text-sm min-w-[400px]">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="p-2 text-left w-28 md:w-40">Producto</th>
-                        <th className="p-2 text-center w-24 md:w-32">Stock</th>
-                        <th className="p-2 text-center w-16 md:w-24 hidden sm:table-cell">Mín.</th>
+                        <th className="p-2 text-left">Producto</th>
+                        <th className="p-2 text-center">Stock</th>
+                        <th className="p-2 text-center hidden sm:table-cell">Mín.</th>
                         <th className="p-2 text-center w-12">Estado</th>
                       </tr>
                     </thead>
                     <tbody>
                       {productos.filter(p => p.categoria === cat).map(p => (
                         <tr key={p.id} className="border-b hover:bg-gray-50">
-                          <td className="p-1 md:p-2 text-xs md:text-sm">{p.nombre}</td>
-                          <td className="p-1">
-                            <div className="flex items-center justify-center">
+                          <td className="p-1 md:p-2">{p.nombre}</td>
+                          <td className="p-1 md:p-2">
+                            <div className="flex items-center justify-center gap-1">
                               <button 
                                 onClick={() => actualizarStock(p.id, -1)}
-                                className="bg-red-500 text-white w-7 h-7 md:w-8 md:h-8 rounded hover:bg-red-600 flex items-center justify-center flex-shrink-0 font-bold text-sm md:text-base"
+                                className="bg-red-500 text-white w-6 h-6 md:w-7 md:h-7 rounded hover:bg-red-600 flex items-center justify-center font-bold text-xs md:text-sm"
                               >
                                 -
                               </button>
@@ -451,7 +451,7 @@ function InventarioContent() {
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                className="w-16 md:w-20 text-center border-2 border-blue-300 rounded-lg py-1.5 px-1 mx-0.5 text-sm md:text-base focus:border-blue-500 focus:outline-none bg-white appearance-none"
+                                className="w-14 md:w-16 text-center border border-blue-300 rounded py-1 px-0.5 text-xs md:text-sm focus:border-blue-500 focus:outline-none bg-white"
                                 value={p.stockActual}
                                 onChange={(e) => {
                                   const valor = parseFloat(e.target.value) || 0;
@@ -463,14 +463,13 @@ function InventarioContent() {
                               />
                               <button 
                                 onClick={() => actualizarStock(p.id, 1)}
-                                className="bg-green-500 text-white w-7 h-7 md:w-8 md:h-8 rounded hover:bg-green-600 flex items-center justify-center flex-shrink-0 font-bold text-sm md:text-base"
+                                className="bg-green-500 text-white w-6 h-6 md:w-7 md:h-7 rounded hover:bg-green-600 flex items-center justify-center font-bold text-xs md:text-sm"
                               >
                                 +
                               </button>
-                              <span className="text-xs text-gray-500 ml-1 hidden md:inline">{p.unidad}</span>
                             </div>
                           </td>
-                          <td className="p-1 md:p-2 text-center font-medium text-xs hidden sm:table-cell">
+                          <td className="p-1 md:p-2 text-center hidden sm:table-cell">
                             {p.stockMinimo?.toFixed(2)}
                           </td>
                           <td className="p-1 md:p-2 text-center">
