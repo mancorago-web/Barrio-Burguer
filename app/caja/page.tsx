@@ -588,7 +588,8 @@ export default function Caja() {
     }
   };
 
-  const hoy = new Date().toISOString().split("T")[0];
+  const hoyFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+  const hoy = hoyFormatter.format(new Date());
   const egresosHoy = egresos.filter(e => e.fecha === hoy);
   const totalEgresos = egresosHoy.reduce((acc, e) => acc + e.monto, 0);
   const montoFinalCalculado = montoInicialGuardado + inyeccionCompras - gastoCompras - totalEgresos;
