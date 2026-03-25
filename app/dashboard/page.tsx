@@ -21,6 +21,7 @@ interface Venta {
   estado: string;
   metodoPago?: string;
   propina?: number;
+  eliminado?: boolean;
 }
 
 export default function Dashboard() {
@@ -130,18 +131,21 @@ export default function Dashboard() {
   const hoyFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
   const hoy = hoyFormatter.format(new Date());
   const ventasDelDia = ventas.filter(v => v.fecha === hoy);
+  const ventasActivas = ventasDelDia.filter(v => !v.eliminado);
+  const ventasEliminadas = ventasDelDia.filter(v => v.eliminado);
   
-  const totalHoy = ventasDelDia.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-  const totalPropinas = ventasDelDia.reduce((acc, v) => acc + (v.propina || 0), 0);
+  const totalHoy = ventasActivas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+  const totalPropinas = ventasActivas.reduce((acc, v) => acc + (v.propina || 0), 0);
   const totalVentasNetas = totalHoy - totalPropinas;
+  const totalEliminadas = ventasEliminadas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
   
-  const totalEfectivo = ventasDelDia.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
-  const totalYape = ventasDelDia.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
-  const totalPos = ventasDelDia.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalEfectivo = ventasActivas.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalYape = ventasActivas.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalPos = ventasActivas.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
   
-  const ventasSalon = ventasDelDia.filter(v => v.tipo === "salon").length;
-  const ventasDelivery = ventasDelDia.filter(v => v.tipo === "delivery").length;
-  const totalComision = ventasDelDia.reduce((acc, v) => acc + (v.comision || 0), 0);
+  const ventasSalon = ventasActivas.filter(v => v.tipo === "salon").length;
+  const ventasDelivery = ventasActivas.filter(v => v.tipo === "delivery").length;
+  const totalComision = ventasActivas.reduce((acc, v) => acc + (v.comision || 0), 0);
 
   const obtenerFechaAnterior = (dias: number) => {
     const fecha = new Date();
@@ -157,7 +161,7 @@ export default function Dashboard() {
 
   const productosMasVendidos = () => {
     const conteo: Record<string, { cantidad: number; nombre: string }> = {};
-    ventasDelDia.forEach(venta => {
+    ventasActivas.forEach(venta => {
       venta.productos?.forEach((p: any) => {
         if (conteo[p.producto?.nombre]) {
           conteo[p.producto.nombre].cantidad += p.cantidad;
@@ -291,13 +295,14 @@ export default function Dashboard() {
                   .sort((a, b) => b.hora.localeCompare(a.hora))
                   .slice(0, 8)
                   .map((v, idx) => (
-                    <div key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded text-sm">
+                    <div key={idx} className={`flex justify-between items-center p-2 rounded text-sm ${v.eliminado ? "bg-red-50 opacity-60" : "bg-gray-50"}`}>
                       <div className="flex items-center gap-2">
+                        {v.eliminado && <span className="text-xs bg-gray-500 text-white px-1 rounded">ELIM</span>}
                         <span className={`w-2 h-2 rounded-full ${v.tipo === "delivery" ? "bg-orange-500" : "bg-blue-500"}`}></span>
-                        <span className="font-medium">{v.mesa}</span>
+                        <span className={`font-medium ${v.eliminado ? "line-through text-gray-500" : ""}`}>{v.mesa}</span>
                         <span className="text-xs text-gray-500">{v.hora}</span>
                       </div>
-                      <span className="font-bold text-green-600">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
+                      <span className={`font-bold ${v.eliminado ? "text-gray-500 line-through" : "text-green-600"}`}>S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
                     </div>
                   ))}
               </div>
@@ -308,7 +313,7 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="font-bold text-gray-800 mb-3">📋 Detalle de Ventas Recientes</h3>
+          <h3 className="font-bold text-gray-800 mb-3">📋 Detalle de Ventas</h3>
           {ventasDelDia.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-xs md:text-sm">
@@ -326,14 +331,17 @@ export default function Dashboard() {
                     .sort((a, b) => b.hora.localeCompare(a.hora))
                     .slice(0, 15)
                     .map((v, idx) => (
-                      <tr key={idx} className="border-b">
-                        <td className="p-2">{v.hora}</td>
+                      <tr key={idx} className={`border-b ${v.eliminado ? "bg-red-50" : ""}`}>
+                        <td className="p-2">
+                          {v.eliminado && <span className="text-xs bg-gray-500 text-white px-1 rounded mr-1">ELIM</span>}
+                          {v.hora}
+                        </td>
                         <td className="p-2 hidden sm:table-cell">
                           <span className={`px-1 py-0.5 rounded text-white text-xs ${v.tipo === "delivery" ? "bg-orange-500" : "bg-blue-500"}`}>
                             {v.tipo === "salon" ? "Salón" : "Delivery"}
                           </span>
                         </td>
-                        <td className="p-2">{v.mesa}</td>
+                        <td className={`p-2 ${v.eliminado ? "line-through text-gray-500" : ""}`}>{v.mesa}</td>
                         <td className="p-2 hidden md:table-cell">
                           {v.productos?.slice(0, 2).map((p: any, i: number) => (
                             <span key={i} className="text-xs">
@@ -342,11 +350,14 @@ export default function Dashboard() {
                           ))}
                           {v.productos?.length > 2 && <span className="text-xs text-gray-500"> +{v.productos.length - 2}</span>}
                         </td>
-                        <td className="p-2 text-right font-bold text-green-600">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</td>
+                        <td className={`p-2 text-right font-bold ${v.eliminado ? "text-gray-500 line-through" : "text-green-600"}`}>S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</td>
                       </tr>
                     ))}
                 </tbody>
               </table>
+              {ventasEliminadas.length > 0 && (
+                <p className="text-xs text-red-500 mt-2">⚠️ {ventasEliminadas.length} venta(s) eliminada(s) por S/.{totalEliminadas.toFixed(2)}</p>
+              )}
             </div>
           ) : (
             <p className="text-gray-500 text-center py-8">No hay ventas registradas hoy</p>
