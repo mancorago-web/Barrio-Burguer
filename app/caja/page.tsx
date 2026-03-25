@@ -6,6 +6,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { getFreshServerDate } from "@/lib/serverDate";
+import * as XLSX from "xlsx";
 
 type TipoEgreso = "egreso" | "propina";
 
@@ -631,6 +632,88 @@ export default function Caja() {
     window.open(`https://wa.me/?text=${mensaje}`, "_blank");
   };
 
+  const exportarCierreExcel = async () => {
+    const serverDate = await getFreshServerDate();
+    const hoy = serverDate.fecha;
+
+    const comprasHoy = compras.filter(c => c.fecha === hoy);
+    const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
+    const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
+    const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
+    const ventasYape = ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
+    const ventasPOS = ventasHoy.filter((v: any) => v.metodoPago === "pos" || v.metodoPago === "tarjeta").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
+    const totalVentas = ventasEfectivo + ventasYape + ventasPOS;
+    const efectivoCaja = montoInicialGuardado + inyeccionCompras + ventasEfectivo - totalCompras - totalEgresos;
+
+    const wb = XLSX.utils.book_new();
+
+    const resumenData = [
+      { Concepto: "Fecha", Valor: hoy },
+      { Concepto: "Usuario", Valor: nombreUsuario },
+      { Concepto: "", Valor: "" },
+      { Concepto: "MONTO INICIAL", Valor: montoInicialGuardado },
+      { Concepto: "INYECCIÓN", Valor: inyeccionCompras },
+      { Concepto: "", Valor: "" },
+      { Concepto: "COMPRAS", Valor: totalCompras },
+      { Concepto: "", Valor: "" },
+      { Concepto: "VENTAS EFECTIVO", Valor: ventasEfectivo },
+      { Concepto: "VENTAS YAPE/PLIN", Valor: ventasYape },
+      { Concepto: "VENTAS POS", Valor: ventasPOS },
+      { Concepto: "TOTAL VENTAS", Valor: totalVentas },
+      { Concepto: "", Valor: "" },
+      { Concepto: "EGRESOS", Valor: totalEgresos },
+      { Concepto: "", Valor: "" },
+      { Concepto: "EFECTIVO EN CAJA", Valor: efectivoCaja },
+    ];
+    const wsResumen = XLSX.utils.json_to_sheet(resumenData);
+    XLSX.utils.book_append_sheet(wb, wsResumen, "Resumen");
+
+    if (ventasHoy.length > 0) {
+      const ventasData = ventasHoy.map((v: any, index: number) => ({
+        "#": index + 1,
+        "Hora": v.hora || "-",
+        "Mesa": v.mesa || "-",
+        "Subtotal": v.total || 0,
+        "Propina": v.propina || 0,
+        "Total": v.totalConPropina || v.total || 0,
+        "Método": v.metodoPago === "efectivo" ? "Efectivo" : v.metodoPago === "yape" ? "Yape" : v.metodoPago === "pos" ? "POS" : "-",
+        "Productos": v.productos?.map((p: any) => `${p.cantidad}x ${p.producto?.nombre || "N/A"}`).join(", ") || "-"
+      }));
+      const wsVentas = XLSX.utils.json_to_sheet(ventasData);
+      XLSX.utils.book_append_sheet(wb, wsVentas, "Ventas");
+    }
+
+    if (comprasHoy.length > 0) {
+      const comprasData = comprasHoy.map((c: any, index: number) => ({
+        "#": index + 1,
+        "Hora": c.hora || "-",
+        "Producto": c.productoNombre || c.producto || "-",
+        "Cantidad": c.cantidad || 0,
+        "Precio Unit.": c.precioUnitario || 0,
+        "Total": c.total || 0,
+      }));
+      const wsCompras = XLSX.utils.json_to_sheet(comprasData);
+      XLSX.utils.book_append_sheet(wb, wsCompras, "Compras");
+    }
+
+    if (egresos.length > 0) {
+      const egresosData = egresos.filter(e => e.fecha === hoy).map((e: any, index: number) => ({
+        "#": index + 1,
+        "Hora": e.hora || "-",
+        "Tipo": e.tipo === "egreso" ? "Egreso" : "Propina",
+        "Descripción": e.descripcion || "-",
+        "Monto": e.monto || 0,
+        "Usuario": e.usuario || "-",
+      }));
+      if (egresosData.length > 0) {
+        const wsEgresos = XLSX.utils.json_to_sheet(egresosData);
+        XLSX.utils.book_append_sheet(wb, wsEgresos, "Egresos");
+      }
+    }
+
+    XLSX.writeFile(wb, `Cierre_${hoy}.xlsx`);
+  };
+
   const guardarCierreDia = async () => {
     const serverDate = await getFreshServerDate();
     const hoy = serverDate.fecha;
@@ -944,6 +1027,12 @@ export default function Caja() {
                   className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
                 >
                   📋 Cierres
+                </button>
+                <button 
+                  onClick={exportarCierreExcel}
+                  className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
+                >
+                  📥 Exportar
                 </button>
               </div>
             </div>
