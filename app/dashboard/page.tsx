@@ -127,26 +127,27 @@ export default function Dashboard() {
     );
   }
 
-  const hoy = new Date().toISOString().split("T")[0];
-  const fechaDesde = ultimoCierre || hoy;
-  const ventasDesdeCierre = ventas.filter(v => v.fecha >= fechaDesde);
+  const hoyFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+  const hoy = hoyFormatter.format(new Date());
+  const ventasDelDia = ventas.filter(v => v.fecha === hoy);
   
-  const totalHoy = ventasDesdeCierre.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-  const totalPropinas = ventasDesdeCierre.reduce((acc, v) => acc + (v.propina || 0), 0);
+  const totalHoy = ventasDelDia.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+  const totalPropinas = ventasDelDia.reduce((acc, v) => acc + (v.propina || 0), 0);
   const totalVentasNetas = totalHoy - totalPropinas;
   
-  const totalEfectivo = ventasDesdeCierre.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
-  const totalYape = ventasDesdeCierre.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
-  const totalPos = ventasDesdeCierre.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalEfectivo = ventasDelDia.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalYape = ventasDelDia.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
+  const totalPos = ventasDelDia.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || 0), 0);
   
-  const ventasSalon = ventasDesdeCierre.filter(v => v.tipo === "salon").length;
-  const ventasDelivery = ventasDesdeCierre.filter(v => v.tipo === "delivery").length;
-  const totalComision = ventasDesdeCierre.reduce((acc, v) => acc + (v.comision || 0), 0);
+  const ventasSalon = ventasDelDia.filter(v => v.tipo === "salon").length;
+  const ventasDelivery = ventasDelDia.filter(v => v.tipo === "delivery").length;
+  const totalComision = ventasDelDia.reduce((acc, v) => acc + (v.comision || 0), 0);
 
   const obtenerFechaAnterior = (dias: number) => {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() - dias);
-    return fecha.toISOString().split("T")[0];
+    const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+    return formatter.format(fecha);
   };
 
   const ventasAyer = ventas.filter(v => v.fecha === obtenerFechaAnterior(1));
@@ -156,7 +157,7 @@ export default function Dashboard() {
 
   const productosMasVendidos = () => {
     const conteo: Record<string, { cantidad: number; nombre: string }> = {};
-    ventasDesdeCierre.forEach(venta => {
+    ventasDelDia.forEach(venta => {
       venta.productos?.forEach((p: any) => {
         if (conteo[p.producto?.nombre]) {
           conteo[p.producto.nombre].cantidad += p.cantidad;
@@ -195,11 +196,8 @@ export default function Dashboard() {
       <div className="container mx-auto p-3 md:p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg md:text-xl font-bold text-gray-800">📈 Ventas en Tiempo Real</h2>
-            <p className="text-xs md:text-sm text-gray-500">Actualizado: {new Date().toLocaleTimeString()}</p>
-            {ultimoCierre && (
-              <p className="text-xs text-blue-600">Desde cierre: {ultimoCierre}</p>
-            )}
+            <h2 className="text-lg md:text-xl font-bold text-gray-800">📈 Ventas de Hoy</h2>
+            <p className="text-xs md:text-sm text-gray-500">Fecha: {hoy}</p>
           </div>
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
@@ -210,7 +208,7 @@ export default function Dashboard() {
         <div className="bg-purple-600 text-white p-4 md:p-6 rounded-lg mb-4">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm opacity-80">{ultimoCierre ? "Total desde Cierre" : "Total del Día"}</p>
+              <p className="text-sm opacity-80">Total del Día</p>
               <p className="text-2xl md:text-4xl font-bold">S/.{totalHoy.toFixed(2)}</p>
             </div>
             <div className="text-right">
@@ -240,7 +238,7 @@ export default function Dashboard() {
           </div>
           <div className="bg-purple-100 p-3 md:p-4 rounded-lg text-center">
             <p className="text-xs md:text-sm text-purple-600">📋 Pedidos</p>
-            <p className="text-lg md:text-2xl font-bold text-purple-800">{ventasDesdeCierre.length}</p>
+            <p className="text-lg md:text-2xl font-bold text-purple-800">{ventasDelDia.length}</p>
           </div>
         </div>
 
@@ -287,9 +285,9 @@ export default function Dashboard() {
 
           <div className="bg-white rounded-lg shadow p-4">
             <h3 className="font-bold text-gray-800 mb-3">🕐 Últimas Ventas</h3>
-            {ventasDesdeCierre.length > 0 ? (
+            {ventasDelDia.length > 0 ? (
               <div className="space-y-2 max-h-48 overflow-y-auto">
-                {[...ventasDesdeCierre]
+                {[...ventasDelDia]
                   .sort((a, b) => b.hora.localeCompare(a.hora))
                   .slice(0, 8)
                   .map((v, idx) => (
@@ -311,7 +309,7 @@ export default function Dashboard() {
 
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="font-bold text-gray-800 mb-3">📋 Detalle de Ventas Recientes</h3>
-          {ventasDesdeCierre.length > 0 ? (
+          {ventasDelDia.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-xs md:text-sm">
                 <thead>
@@ -324,7 +322,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {[...ventasDesdeCierre]
+                  {[...ventasDelDia]
                     .sort((a, b) => b.hora.localeCompare(a.hora))
                     .slice(0, 15)
                     .map((v, idx) => (
