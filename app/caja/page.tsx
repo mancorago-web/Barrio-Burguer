@@ -19,6 +19,7 @@ type Egreso = {
   hora: string;
   usuario?: string;
   metodoPago?: string;
+  eliminado?: boolean;
 };
 
 type InyeccionCaja = {
@@ -576,12 +577,17 @@ export default function Caja() {
   const eliminarEgreso = async (id: number) => {
     if (!confirm("¿Estás seguro de eliminar este egreso?")) return;
 
-    const nuevosEgresos = egresos.filter(e => e.id !== id);
-    setEgresos(nuevosEgresos);
+    const egresosActualizados = egresos.map(e => {
+      if (e.id === id) {
+        return { ...e, eliminado: true };
+      }
+      return e;
+    });
+    setEgresos(egresosActualizados);
 
     try {
       await setDoc(doc(db, "caja", "egresos"), {
-        egresos: nuevosEgresos
+        egresos: egresosActualizados
       });
     } catch (error) {
       console.error("Error eliminando egreso:", error);
@@ -590,7 +596,8 @@ export default function Caja() {
 
   const hoyFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
   const hoy = hoyFormatter.format(new Date());
-  const egresosHoy = egresos.filter(e => e.fecha === hoy);
+  const egresosActivos = egresos.filter(e => !e.eliminado);
+  const egresosHoy = egresosActivos.filter(e => e.fecha === hoy);
   const totalEgresos = egresosHoy.reduce((acc, e) => acc + e.monto, 0);
   const montoFinalCalculado = montoInicialGuardado + inyeccionCompras - gastoCompras - totalEgresos;
 
@@ -930,18 +937,23 @@ export default function Caja() {
                     </div>
                     
                     {(() => {
-                      const egresosFiltrados = [...egresos.filter(e => e.fecha === fechaFiltro)]
-                        .sort((a, b) => b.hora.localeCompare(a.hora));
-                      const totalDia = egresosFiltrados.reduce((acc, e) => acc + e.monto, 0);
+                      const egresosTodos = egresos.filter(e => e.fecha === fechaFiltro);
+                      const egresosActivos = egresosTodos.filter(e => !e.eliminado);
+                      const egresosEliminados = egresosTodos.filter(e => e.eliminado);
+                      const totalDia = egresosActivos.reduce((acc, e) => acc + e.monto, 0);
+                      const totalEliminados = egresosEliminados.reduce((acc, e) => acc + e.monto, 0);
                       
                       return (
                         <>
                           <div className="bg-blue-100 p-4 rounded mb-4">
                             <p className="text-blue-800 font-bold">Total del día ({fechaFiltro}): S/.{totalDia.toFixed(2)}</p>
-                            <p className="text-sm text-blue-600">{egresosFiltrados.length} egresos</p>
+                            <p className="text-sm text-blue-600">{egresosActivos.length} egresos</p>
+                            {egresosEliminados.length > 0 && (
+                              <p className="text-sm text-red-500">({egresosEliminados.length} eliminados: S/.{totalEliminados.toFixed(2)})</p>
+                            )}
                           </div>
                           
-                          {egresosFiltrados.length === 0 ? (
+                          {egresosTodos.length === 0 ? (
                             <p className="text-gray-500">No hay egresos en esta fecha.</p>
                           ) : (
                             <div className="overflow-x-auto">
@@ -951,7 +963,6 @@ export default function Caja() {
                                     <th className="p-2 text-left">Tipo</th>
                                     <th className="p-2 text-left">Descripción</th>
                                     <th className="p-2 text-right">Monto</th>
-                                    <th className="p-2 text-left">Fecha</th>
                                     <th className="p-2 text-left">Hora</th>
                                     <th className="p-2 text-left">Usuario</th>
                                     <th className="p-2 text-left">Método</th>
@@ -959,9 +970,14 @@ export default function Caja() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {egresosFiltrados.map(e => (
-                                    <tr key={e.id} className="border-b">
+                                  {egresosTodos.sort((a, b) => b.hora.localeCompare(a.hora)).map(e => (
+                                    <tr key={e.id} className={`border-b ${e.eliminado ? "bg-gray-100 opacity-60" : ""}`}>
                                       <td className="p-2">
+                                        {e.eliminado && (
+                                          <span className="px-2 py-1 rounded text-white text-xs bg-gray-500 mr-1">
+                                            ELIMINADO
+                                          </span>
+                                        )}
                                         <span className={`px-2 py-1 rounded text-white text-xs ${
                                           e.tipo === "egreso" ? "bg-orange-500" : "bg-purple-500"
                                         }`}>
@@ -969,8 +985,9 @@ export default function Caja() {
                                         </span>
                                       </td>
                                       <td className="p-2">{e.descripcion || "-"}</td>
-                                      <td className="p-2 text-right font-bold text-red-600">S/.{e.monto.toFixed(2)}</td>
-                                      <td className="p-2">{e.fecha}</td>
+                                      <td className={`p-2 text-right font-bold ${e.eliminado ? "text-gray-500 line-through" : "text-red-600"}`}>
+                                        S/.{e.monto.toFixed(2)}
+                                      </td>
                                       <td className="p-2">{e.hora}</td>
                                       <td className="p-2">
                                         <span className={`px-2 py-1 rounded text-white text-xs ${
@@ -993,12 +1010,14 @@ export default function Caja() {
                                         </span>
                                       </td>
                                       <td className="p-2 text-center">
-                                        <button 
-                                          onClick={() => eliminarEgreso(e.id)}
-                                          className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-                                        >
-                                          Eliminar
-                                        </button>
+                                        {!e.eliminado && (
+                                          <button 
+                                            onClick={() => eliminarEgreso(e.id)}
+                                            className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                                          >
+                                            Eliminar
+                                          </button>
+                                        )}
                                       </td>
                                     </tr>
                                   ))}
@@ -1008,10 +1027,10 @@ export default function Caja() {
                           )}
                         </>
                       );
-                  })()}
-                </div>
+                    })()}
+                  </div>
               )}
-              
+
               <div className="mt-4 flex flex-wrap gap-2">
                 <button 
                   onClick={() => {
