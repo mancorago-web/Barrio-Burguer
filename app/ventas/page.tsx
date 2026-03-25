@@ -65,10 +65,14 @@ export default function Ventas() {
   }, [router]);
 
   useEffect(() => {
-    const initializeDates = async () => {
-      const serverDate = await getFreshServerDate();
-      setFechaFiltroVentas(serverDate.fecha);
-      setFechaFiltroDelivery(serverDate.fecha);
+    const initializeDates = () => {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Lima",
+      });
+      const localDate = formatter.format(now);
+      setFechaFiltroVentas(localDate);
+      setFechaFiltroDelivery(localDate);
     };
     initializeDates();
   }, []);
