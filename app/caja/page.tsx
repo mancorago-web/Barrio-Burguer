@@ -1324,7 +1324,15 @@ export default function Caja() {
       {modalCierreDia && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-6 text-center">🔒 Cierre del Día</h2>
+            {(() => {
+              const formatter = new Intl.DateTimeFormat("es-PE", { timeZone: "America/Lima", day: "2-digit", month: "long", year: "numeric" });
+              const fechaFormateada = formatter.format(new Date());
+              return <h2 className="text-2xl font-bold mb-2 text-center">🔒 Cierre del Día</h2>;
+            })()}
+            <p className="text-center text-lg font-semibold text-blue-600 mb-6">{(() => {
+              const formatter = new Intl.DateTimeFormat("es-PE", { timeZone: "America/Lima", day: "2-digit", month: "long", year: "numeric" });
+              return formatter.format(new Date());
+            })()}</p>
             
             <div className="space-y-4">
               <div className="bg-gray-100 p-4 rounded-lg">
@@ -1344,7 +1352,8 @@ export default function Caja() {
               <div className="bg-blue-100 p-4 rounded-lg">
                 <h3 className="font-bold text-lg mb-2">🛒 Registro de Compras</h3>
                 {(() => {
-                  const hoy = new Date().toISOString().split("T")[0];
+                  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+                  const hoy = formatter.format(new Date());
                   const comprasHoy = compras.filter(c => c.fecha === hoy);
                   const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
                   return (
@@ -1359,7 +1368,8 @@ export default function Caja() {
               <div className="bg-green-100 p-4 rounded-lg">
                 <h3 className="font-bold text-lg mb-2">💰 Ventas del Día</h3>
                 {(() => {
-                  const hoy = new Date().toISOString().split("T")[0];
+                  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+                  const hoy = formatter.format(new Date());
                   const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
                   const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
                   const ventasYape = ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
@@ -1398,7 +1408,8 @@ export default function Caja() {
               <div className="bg-green-600 text-white p-4 rounded-lg">
                 <h3 className="font-bold text-lg mb-2">💵 Efectivo en Caja</h3>
                 {(() => {
-                  const hoy = new Date().toISOString().split("T")[0];
+  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+  const hoy = formatter.format(new Date());
                   const comprasHoy = compras.filter(c => c.fecha === hoy);
                   const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
                   const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
