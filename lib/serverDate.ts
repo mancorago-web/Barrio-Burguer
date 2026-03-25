@@ -6,13 +6,51 @@ let cachedTimestamp: number | null = null;
 let lastFetchTime: number = 0;
 const CACHE_DURATION = 60000;
 
+const PERU_TIMEZONE = "America/Lima";
+
+function getLocalDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getLocalTimeString(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
+function getLocalDateTimeFromTimestamp(timestamp: number): { fecha: string; hora: string } {
+  const date = new Date(timestamp);
+  
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: PERU_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  
+  const timeFormatter = new Intl.DateTimeFormat("es-PE", {
+    timeZone: PERU_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  
+  const fecha = formatter.format(date);
+  const hora = timeFormatter.format(date);
+  
+  return { fecha, hora };
+}
+
 export async function getServerDate(): Promise<{ fecha: string; hora: string; timestamp: number }> {
   const now = Date.now();
   
   if (cachedDate && cachedTimestamp && (now - lastFetchTime) < CACHE_DURATION) {
     return {
       fecha: cachedDate,
-      hora: cachedTimestamp ? new Date(cachedTimestamp).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }) : "",
+      hora: cachedTimestamp ? getLocalTimeString(new Date(cachedTimestamp)) : "",
       timestamp: cachedTimestamp
     };
   }
@@ -30,28 +68,20 @@ export async function getServerDate(): Promise<{ fecha: string; hora: string; ti
       await setDoc(ref, { timestamp: serverTime, updatedAt: new Date().toISOString() });
     }
     
-    const serverDate = new Date(serverTime);
-    cachedDate = serverDate.toISOString().split("T")[0];
+    const { fecha, hora } = getLocalDateTimeFromTimestamp(serverTime);
+    cachedDate = fecha;
     cachedTimestamp = serverTime;
     lastFetchTime = now;
     
-    return {
-      fecha: cachedDate,
-      hora: serverDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
-      timestamp: serverTime
-    };
+    return { fecha, hora, timestamp: serverTime };
   } catch {
     const fallbackTime = now;
-    const fallbackDate = new Date(fallbackTime);
-    cachedDate = fallbackDate.toISOString().split("T")[0];
+    const { fecha, hora } = getLocalDateTimeFromTimestamp(fallbackTime);
+    cachedDate = fecha;
     cachedTimestamp = fallbackTime;
     lastFetchTime = now;
     
-    return {
-      fecha: cachedDate,
-      hora: fallbackDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
-      timestamp: cachedTimestamp
-    };
+    return { fecha, hora, timestamp: fallbackTime };
   }
 }
 
@@ -69,20 +99,13 @@ export async function getFreshServerDate(): Promise<{ fecha: string; hora: strin
       await setDoc(ref, { timestamp: serverTime, updatedAt: new Date().toISOString() });
     }
     
-    const serverDate = new Date(serverTime);
+    const { fecha, hora } = getLocalDateTimeFromTimestamp(serverTime);
     
-    return {
-      fecha: serverDate.toISOString().split("T")[0],
-      hora: serverDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
-      timestamp: serverTime
-    };
+    return { fecha, hora, timestamp: serverTime };
   } catch {
-    const fallbackDate = new Date();
-    return {
-      fecha: fallbackDate.toISOString().split("T")[0],
-      hora: fallbackDate.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" }),
-      timestamp: fallbackDate.getTime()
-    };
+    const fallbackTime = Date.now();
+    const { fecha, hora } = getLocalDateTimeFromTimestamp(fallbackTime);
+    return { fecha, hora, timestamp: fallbackTime };
   }
 }
 
@@ -95,7 +118,8 @@ export async function updateServerTime(): Promise<void> {
       updatedAt: new Date().toISOString() 
     }, { merge: true });
     
-    cachedDate = new Date(now).toISOString().split("T")[0];
+    const { fecha } = getLocalDateTimeFromTimestamp(now);
+    cachedDate = fecha;
     cachedTimestamp = now;
     lastFetchTime = now;
   } catch (error) {

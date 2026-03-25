@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getServerDate, updateServerTime } from "@/lib/serverDate";
 
+const PERU_TIMEZONE = "America/Lima";
+
 export default function HeaderTimer() {
   const [currentDate, setCurrentDate] = useState<string>("");
   const [currentTime, setCurrentTime] = useState<string>("");
@@ -12,21 +14,26 @@ export default function HeaderTimer() {
     const initializeServerTime = async () => {
       await updateServerTime();
       const serverDate = await getServerDate();
-      const now = new Date(serverDate.timestamp);
+      const date = new Date(serverDate.timestamp);
       
-      const dateStr = now.toLocaleDateString("es-PE", {
+      const dateFormatter = new Intl.DateTimeFormat("es-PE", {
+        timeZone: PERU_TIMEZONE,
         weekday: "short",
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
-      const timeStr = now.toLocaleTimeString("es-PE", {
+      
+      const timeFormatter = new Intl.DateTimeFormat("es-PE", {
+        timeZone: PERU_TIMEZONE,
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
+        hour12: false,
       });
-      setCurrentDate(dateStr);
-      setCurrentTime(timeStr);
+      
+      setCurrentDate(dateFormatter.format(date));
+      setCurrentTime(timeFormatter.format(date));
       setSynced(true);
     };
 
@@ -34,21 +41,26 @@ export default function HeaderTimer() {
 
     const interval = setInterval(async () => {
       const serverDate = await getServerDate();
-      const now = new Date(serverDate.timestamp);
+      const date = new Date(serverDate.timestamp);
       
-      const dateStr = now.toLocaleDateString("es-PE", {
+      const dateFormatter = new Intl.DateTimeFormat("es-PE", {
+        timeZone: PERU_TIMEZONE,
         weekday: "short",
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
-      const timeStr = now.toLocaleTimeString("es-PE", {
+      
+      const timeFormatter = new Intl.DateTimeFormat("es-PE", {
+        timeZone: PERU_TIMEZONE,
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
+        hour12: false,
       });
-      setCurrentDate(dateStr);
-      setCurrentTime(timeStr);
+      
+      setCurrentDate(dateFormatter.format(date));
+      setCurrentTime(timeFormatter.format(date));
     }, 1000);
 
     return () => clearInterval(interval);
