@@ -34,9 +34,9 @@ export default function Ventas() {
   const [montoRecibido, setMontoRecibido] = useState(0);
   const [propina, setPropina] = useState(0);
   const [ventas, setVentas] = useState<any[]>([]);
-  const [fechaFiltroVentas, setFechaFiltroVentas] = useState(new Date().toISOString().split("T")[0]);
+  const [fechaFiltroVentas, setFechaFiltroVentas] = useState("");
   const [verRegistroDelivery, setVerRegistroDelivery] = useState(false);
-  const [fechaFiltroDelivery, setFechaFiltroDelivery] = useState(new Date().toISOString().split("T")[0]);
+  const [fechaFiltroDelivery, setFechaFiltroDelivery] = useState("");
   const [mesaSeleccionada, setMesaSeleccionada] = useState<string>("Mesa 1");
   const [pedidosMesas, setPedidosMesas] = useState<Record<string, ItemPedido[]>>({});
   const [pedidosAbiertos, setPedidosAbiertos] = useState<any[]>([]);
@@ -63,6 +63,15 @@ export default function Ventas() {
     
     return () => unsubscribe();
   }, [router]);
+
+  useEffect(() => {
+    const initializeDates = async () => {
+      const serverDate = await getFreshServerDate();
+      setFechaFiltroVentas(serverDate.fecha);
+      setFechaFiltroDelivery(serverDate.fecha);
+    };
+    initializeDates();
+  }, []);
 
   useEffect(() => {
     const cargarMenu = async () => {
