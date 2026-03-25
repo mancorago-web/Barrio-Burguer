@@ -6,6 +6,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import * as XLSX from "xlsx";
+import { getServerDate } from "@/lib/serverDate";
 
 interface ProductoVenta {
   id: number;
@@ -203,9 +204,8 @@ export default function Ventas() {
   const guardarPedido = async () => {
     if (pedido.length === 0) return;
     
-    const ahora = new Date();
-    const fecha = ahora.toISOString().split("T")[0];
-    const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+    const serverDate = await getServerDate();
+    const { fecha, hora } = serverDate;
 
     const totalConPropina = getTotalConPropina();
     const esMancoraGo = mesaSeleccionada === "Máncora Go!";

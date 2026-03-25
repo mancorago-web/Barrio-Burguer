@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getServerDate } from "@/lib/serverDate";
 
 type TipoEgreso = "egreso" | "propina";
 
@@ -349,10 +350,9 @@ export default function Caja() {
 
       const datos = docSnap.data();
       let productos = datos.productos || [];
-      const ahora = new Date();
-      const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
-      const fecha = ahora.toISOString().split("T")[0];
-      const fechaActualizada = `${ahora.toLocaleDateString()} ${hora}`;
+      const serverDate = await getServerDate();
+      const { fecha, hora } = serverDate;
+      const fechaActualizada = `${fecha} ${hora}`;
 
       const nuevasComprasRegistradas: any[] = [];
       const nuevosProductos = productos.map((p: any) => {
@@ -433,14 +433,17 @@ export default function Caja() {
   const registrarCompra = async () => {
     if (!nuevaCompraProducto || nuevaCompraCantidad <= 0 || nuevaCompraPrecio <= 0) return;
 
+    const serverDate = await getServerDate();
+    const { fecha, hora } = serverDate;
+
     const nuevaCompra: any = {
       id: Date.now(),
       producto: nuevaCompraProducto,
       cantidad: nuevaCompraCantidad,
       precioUnitario: nuevaCompraPrecio,
       total: nuevaCompraCantidad * nuevaCompraPrecio,
-      fecha: new Date().toISOString().split("T")[0],
-      hora: `${new Date().getHours().toString().padStart(2, '0')}:${new Date().getMinutes().toString().padStart(2, '0')}`
+      fecha,
+      hora
     };
 
     const nuevasCompras = [...compras, nuevaCompra];
@@ -489,10 +492,9 @@ export default function Caja() {
   const guardarInyeccion = async () => {
     if (inyeccionMonto <= 0) return;
 
-    const ahora = new Date();
-    const fecha = ahora.toISOString().split("T")[0];
-    const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
-    const fechaHora = `${ahora.toLocaleDateString()} ${hora}`;
+    const serverDate = await getServerDate();
+    const { fecha, hora } = serverDate;
+    const fechaHora = `${fecha} ${hora}`;
 
     const nuevaInyeccion: InyeccionCaja = {
       id: Date.now(),
@@ -532,8 +534,8 @@ export default function Caja() {
   const guardarEgreso = async () => {
     if (monto <= 0) return;
 
-    const ahora = new Date();
-    const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+    const serverDate = await getServerDate();
+    const { fecha, hora } = serverDate;
 
     const nuevoEgreso: Egreso = {
       id: Date.now(),
@@ -623,9 +625,9 @@ export default function Caja() {
   };
 
   const guardarCierreDia = async () => {
-    const hoy = new Date().toISOString().split("T")[0];
-    const ahora = new Date();
-    const hora = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+    const serverDate = await getServerDate();
+    const hoy = serverDate.fecha;
+    const hora = serverDate.hora;
     
     const comprasHoy = compras.filter(c => c.fecha === hoy);
     const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
