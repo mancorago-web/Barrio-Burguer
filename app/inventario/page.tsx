@@ -367,11 +367,9 @@ function InventarioContent() {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-base md:text-xl font-bold">📦 Inventario</h1>
           <div className="flex gap-2">
-            {(rol === "admin" || rol === "jefe") && (
-              <button onClick={() => router.push("/menu")} className="bg-blue-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-blue-800">
-                ← Menú
-              </button>
-            )}
+            <button onClick={() => router.push("/menu")} className="bg-blue-700 px-2 md:px-4 py-2 rounded text-sm hover:bg-blue-800">
+              ← Menú
+            </button>
             <button onClick={cerrarSesion} className="bg-red-600 px-2 md:px-4 py-2 rounded text-sm hover:bg-red-700">
               Salir
             </button>
