@@ -459,6 +459,26 @@ export default function Ventas() {
       
       await setDoc(abiertosRef, { pedidos: pedidosActualizados }, { merge: true });
       
+      // Enviar copia a cocina
+      const cocinaRef = doc(db, "cocina", "pedidos");
+      const cocinaSnap = await getDoc(cocinaRef);
+      const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+      
+      const pedidoCocina = {
+        id: Date.now(),
+        mesa: mesaSeleccionada,
+        productos: pedido.map((item: ItemPedido) => ({
+          nombre: item.producto.nombre,
+          cantidad: item.cantidad
+        })),
+        hora,
+        fecha,
+        usuario: nombreUsuario,
+        estado: "pendiente"
+      };
+      
+      await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
+      
       const nuevosPedidosMesas = { ...pedidosMesas };
       delete nuevosPedidosMesas[mesaSeleccionada];
       setPedidosMesas(nuevosPedidosMesas);
