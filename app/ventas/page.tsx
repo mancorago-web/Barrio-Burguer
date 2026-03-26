@@ -213,6 +213,22 @@ export default function Ventas() {
     return pedido.reduce((acc, item) => acc + (item.producto.precio * item.cantidad), 0);
   };
 
+  const marcarPedidoListo = async (pedidoId: number) => {
+    try {
+      const cocinaRef = doc(db, "cocina", "pedidos");
+      const cocinaSnap = await getDoc(cocinaRef);
+      if (cocinaSnap.exists()) {
+        const pedidosActualizados = cocinaSnap.data().pedidos.map((p: any) => 
+          p.id === pedidoId ? { ...p, estado: "listo" } : p
+        );
+        await setDoc(cocinaRef, { pedidos: pedidosActualizados }, { merge: true });
+        setPedidosCocina(pedidosActualizados);
+      }
+    } catch (error) {
+      console.error("Error marcando pedido como listo:", error);
+    }
+  };
+
   const getTotalConPropina = () => {
     return getTotal() + propina;
   };
@@ -1222,7 +1238,7 @@ export default function Ventas() {
           ) : (
             <div className="space-y-3">
               {pedidosCocina.map((pedido, idx) => (
-                <div key={pedido.id || idx} className="border rounded-lg p-3 bg-red-50">
+                <div key={pedido.id || idx} className={`border rounded-lg p-3 ${pedido.estado === "listo" ? "bg-green-100" : "bg-red-50"}`}>
                   <div className="flex justify-between items-center mb-2">
                     <span className={`font-bold text-lg px-2 py-1 rounded ${
                       pedido.mesa === "Personal" ? "bg-red-500 text-white" :
@@ -1239,11 +1255,22 @@ export default function Ventas() {
                   </div>
                   <ul className="space-y-1">
                     {pedido.productos?.map((item: any, i: number) => (
-                      <li key={i} className="flex justify-between items-center py-1 border-b border-red-100 last:border-0">
+                      <li key={i} className={`flex justify-between items-center py-1 border-b last:border-0 ${pedido.estado === "listo" ? "border-green-200" : "border-red-100"}`}>
                         <span className="font-medium">{item.cantidad}x {item.nombre}</span>
                       </li>
                     ))}
                   </ul>
+                  {pedido.estado !== "listo" && (
+                    <button
+                      onClick={() => marcarPedidoListo(pedido.id)}
+                      className="mt-3 w-full bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600"
+                    >
+                      ✅ Listo
+                    </button>
+                  )}
+                  {pedido.estado === "listo" && (
+                    <p className="mt-3 text-center text-green-600 font-bold">✓ Pedido Listo</p>
+                  )}
                 </div>
               ))}
             </div>
