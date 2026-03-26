@@ -44,6 +44,8 @@ export default function Ventas() {
   const [inventario, setInventario] = useState<any[]>([]);
   const [guardandoPedido, setGuardandoPedido] = useState(false);
   const [pedidosCocina, setPedidosCocina] = useState<any[]>([]);
+  const [verRegistroCocina, setVerRegistroCocina] = useState(false);
+  const [fechaFiltroCocina, setFechaFiltroCocina] = useState("");
   const [rol, setRol] = useState<string>("cocina");
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function Ventas() {
       const localDate = formatter.format(now);
       setFechaFiltroVentas(localDate);
       setFechaFiltroDelivery(localDate);
+      setFechaFiltroCocina(localDate);
     };
     initializeDates();
   }, []);
@@ -354,25 +357,24 @@ export default function Ventas() {
       }
       
       // Enviar copia a cocina
-      if (!esPersonal) {
-        const cocinaRef = doc(db, "cocina", "pedidos");
-        const cocinaSnap = await getDoc(cocinaRef);
-        const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
-        
-        const pedidoCocina = {
-          id: Date.now(),
-          mesa: mesaSeleccionada,
-          productos: pedido.map((item: ItemPedido) => ({
-            nombre: item.producto.nombre,
-            cantidad: item.cantidad
-          })),
-          hora,
-          usuario: nombreUsuario,
-          estado: "pendiente"
-        };
-        
-        await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
-      }
+      const cocinaRef = doc(db, "cocina", "pedidos");
+      const cocinaSnap = await getDoc(cocinaRef);
+      const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+      
+      const pedidoCocina = {
+        id: Date.now(),
+        mesa: mesaSeleccionada,
+        productos: pedido.map((item: ItemPedido) => ({
+          nombre: item.producto.nombre,
+          cantidad: item.cantidad
+        })),
+        hora,
+        fecha,
+        usuario: nombreUsuario,
+        estado: "pendiente"
+      };
+      
+      await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
       
       const nuevosPedidosMesas = { ...pedidosMesas };
       delete nuevosPedidosMesas[mesaSeleccionada];
@@ -1183,47 +1185,42 @@ export default function Ventas() {
         </div>
       )}
 
-      {vista === "cocina" && (
+      {vista === "cocina" && !verRegistroCocina && (
         <div className="bg-white rounded-lg shadow p-3 md:p-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-base md:text-lg font-bold">👨‍🍳 Pedidos para Cocina</h2>
-            <button 
-              onClick={() => {
-                const cocinaRef = doc(db, "cocina", "pedidos");
-                setDoc(cocinaRef, { pedidos: [] });
-                setPedidosCocina([]);
-              }}
-              className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300"
+            <button
+              onClick={() => setVerRegistroCocina(true)}
+              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
             >
-              🗑️ Limpiar
+              📋 Registro Cocina
             </button>
           </div>
           
           {pedidosCocina.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No hay pedidos pendientes</p>
+            <p className="text-gray-500 text-center py-8">No hay pedidos en cocina</p>
           ) : (
             <div className="space-y-3">
               {pedidosCocina.map((pedido, idx) => (
                 <div key={pedido.id || idx} className="border rounded-lg p-3 bg-red-50">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-bold text-lg">{pedido.mesa}</span>
-                    <span className="text-sm text-gray-500">{pedido.hora}</span>
+                    <span className={`font-bold text-lg px-2 py-1 rounded ${
+                      pedido.mesa === "Personal" ? "bg-red-500 text-white" :
+                      pedido.mesa === "Máncora Go!" ? "bg-orange-500 text-white" :
+                      pedido.mesa === "Llevar" ? "bg-blue-500 text-white" :
+                      "bg-green-500 text-white"
+                    }`}>
+                      {pedido.mesa}
+                    </span>
+                    <div className="text-right">
+                      <span className="text-sm text-gray-500 block">{pedido.fecha}</span>
+                      <span className="text-sm text-gray-500">{pedido.hora}</span>
+                    </div>
                   </div>
                   <ul className="space-y-1">
                     {pedido.productos?.map((item: any, i: number) => (
                       <li key={i} className="flex justify-between items-center py-1 border-b border-red-100 last:border-0">
                         <span className="font-medium">{item.cantidad}x {item.nombre}</span>
-                        <button 
-                          onClick={async () => {
-                            const nuevosPedidos = pedidosCocina.filter((_, index) => index !== idx);
-                            setPedidosCocina(nuevosPedidos);
-                            const cocinaRef = doc(db, "cocina", "pedidos");
-                            await setDoc(cocinaRef, { pedidos: nuevosPedidos });
-                          }}
-                          className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
-                        >
-                          ✓ Listo
-                        </button>
                       </li>
                     ))}
                   </ul>
@@ -1231,6 +1228,84 @@ export default function Ventas() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {vista === "cocina" && verRegistroCocina && (
+        <div className="bg-white rounded-lg shadow p-3 md:p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base md:text-lg font-bold">📋 Registro de Cocina</h2>
+            <button
+              onClick={() => setVerRegistroCocina(false)}
+              className="bg-gray-500 text-white px-3 py-2 rounded text-sm hover:bg-gray-600"
+            >
+              ← Volver
+            </button>
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <label className="text-sm font-bold">Fecha:</label>
+            <input 
+              type="date" 
+              className="border p-2 rounded text-sm"
+              value={fechaFiltroCocina}
+              onChange={(e) => setFechaFiltroCocina(e.target.value)}
+            />
+          </div>
+          
+          {(() => {
+            const pedidosFiltrados = [...pedidosCocina.filter(p => p.fecha === fechaFiltroCocina)]
+              .sort((a, b) => {
+                const aTime = a.hora.split(':').map(Number);
+                const bTime = b.hora.split(':').map(Number);
+                const aMinutes = aTime[0] * 60 + aTime[1];
+                const bMinutes = bTime[0] * 60 + bTime[1];
+                return bMinutes - aMinutes;
+              });
+            
+            return (
+              <>
+                <div className="bg-blue-100 p-3 rounded mb-4">
+                  <p className="text-blue-800 font-bold text-sm md:text-base">
+                    {pedidosFiltrados.length} pedidos para {fechaFiltroCocina}
+                  </p>
+                </div>
+                
+                {pedidosFiltrados.length === 0 ? (
+                  <p className="text-gray-500 text-center py-4">No hay pedidos en esta fecha.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {pedidosFiltrados.map((pedido, idx) => (
+                      <div key={pedido.id || idx} className="border rounded-lg p-3 bg-gray-50">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className={`font-bold text-lg px-2 py-1 rounded ${
+                            pedido.mesa === "Personal" ? "bg-red-500 text-white" :
+                            pedido.mesa === "Máncora Go!" ? "bg-orange-500 text-white" :
+                            pedido.mesa === "Llevar" ? "bg-blue-500 text-white" :
+                            "bg-green-500 text-white"
+                          }`}>
+                            {pedido.mesa}
+                          </span>
+                          <div className="text-right">
+                            <span className="text-sm text-gray-500 block">{pedido.fecha}</span>
+                            <span className="text-sm text-gray-500">{pedido.hora}</span>
+                          </div>
+                        </div>
+                        <ul className="space-y-1">
+                          {pedido.productos?.map((item: any, i: number) => (
+                            <li key={i} className="flex justify-between items-center py-1 border-b border-gray-200 last:border-0">
+                              <span className="font-medium">{item.cantidad}x {item.nombre}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-xs text-gray-500 mt-2">Atendido por: {pedido.usuario}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
     </main>
