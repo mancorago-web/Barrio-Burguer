@@ -372,25 +372,31 @@ export default function Ventas() {
         await setDoc(abiertosRef, { pedidos: pedidosFiltrados }, { merge: true });
       }
       
-      // Enviar copia a cocina
-      const cocinaRef = doc(db, "cocina", "pedidos");
-      const cocinaSnap = await getDoc(cocinaRef);
-      const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+      // Enviar a cocina solo si no es una mesa que ya fue registrada (ya se envio al registrar)
+      const mesas = ["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6"];
+      const esMesaRegistrada = mesas.includes(mesaSeleccionada);
+      const mesaYaRegistrada = pedidosAbiertos.some((p: any) => p.mesa === mesaSeleccionada && p.estado === "abierto");
       
-      const pedidoCocina = {
-        id: Date.now(),
-        mesa: mesaSeleccionada,
-        productos: pedido.map((item: ItemPedido) => ({
-          nombre: item.producto.nombre,
-          cantidad: item.cantidad
-        })),
-        hora,
-        fecha,
-        usuario: nombreUsuario,
-        estado: "pendiente"
-      };
-      
-      await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
+      if (!esMesaRegistrada || !mesaYaRegistrada) {
+        const cocinaRef = doc(db, "cocina", "pedidos");
+        const cocinaSnap = await getDoc(cocinaRef);
+        const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+        
+        const pedidoCocina = {
+          id: Date.now(),
+          mesa: mesaSeleccionada,
+          productos: pedido.map((item: ItemPedido) => ({
+            nombre: item.producto.nombre,
+            cantidad: item.cantidad
+          })),
+          hora,
+          fecha,
+          usuario: nombreUsuario,
+          estado: "pendiente"
+        };
+        
+        await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
+      }
       
       const nuevosPedidosMesas = { ...pedidosMesas };
       delete nuevosPedidosMesas[mesaSeleccionada];
@@ -475,25 +481,27 @@ export default function Ventas() {
       
       await setDoc(abiertosRef, { pedidos: pedidosActualizados }, { merge: true });
       
-      // Enviar copia a cocina
-      const cocinaRef = doc(db, "cocina", "pedidos");
-      const cocinaSnap = await getDoc(cocinaRef);
-      const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
-      
-      const pedidoCocina = {
-        id: Date.now(),
-        mesa: mesaSeleccionada,
-        productos: pedido.map((item: ItemPedido) => ({
-          nombre: item.producto.nombre,
-          cantidad: item.cantidad
-        })),
-        hora,
-        fecha,
-        usuario: nombreUsuario,
-        estado: "pendiente"
-      };
-      
-      await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
+      // Enviar a cocina solo si es la primera vez que se registra (no si ya estaba abierta)
+      if (!pedidoExistente) {
+        const cocinaRef = doc(db, "cocina", "pedidos");
+        const cocinaSnap = await getDoc(cocinaRef);
+        const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+        
+        const pedidoCocina = {
+          id: Date.now(),
+          mesa: mesaSeleccionada,
+          productos: pedido.map((item: ItemPedido) => ({
+            nombre: item.producto.nombre,
+            cantidad: item.cantidad
+          })),
+          hora,
+          fecha,
+          usuario: nombreUsuario,
+          estado: "pendiente"
+        };
+        
+        await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
+      }
       
       const nuevosPedidosMesas = { ...pedidosMesas };
       delete nuevosPedidosMesas[mesaSeleccionada];
