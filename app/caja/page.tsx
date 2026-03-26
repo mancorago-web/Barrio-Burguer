@@ -1315,6 +1315,23 @@ export default function Caja() {
                       );
                     })}
                 </tbody>
+                <tfoot>
+                  <tr className="bg-green-100 font-bold">
+                    <td className="p-2 text-right" colSpan={4}>TOTAL:</td>
+                    <td className="p-2 text-right">S/.{
+                      productosPorPedir
+                        .filter(p => {
+                          const falta = (p.stockMinimo || 0) - (p.stockActual || 0);
+                          const porPedir = p.porPedir !== undefined ? p.porPedir : falta;
+                          return porPedir > 0;
+                        })
+                        .reduce((acc, p) => {
+                          const cantidad = comprasARegistrar[p.id] || 0;
+                          return acc + (cantidad * (p.precioCompra || 0));
+                        }, 0).toFixed(2)
+                    }</td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
 
