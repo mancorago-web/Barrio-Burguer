@@ -1461,7 +1461,7 @@ export default function Caja() {
                 {(() => {
                   const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
                   const hoy = formatter.format(new Date());
-                  const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
+                  const ventasHoy = ventasDelDia.filter((v: any) => (v.fecha?.split(" ")[0] === hoy || v.fecha === hoy) && !v.eliminado);
                   const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
                   const ventasYape = ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
                   const ventasPOS = ventasHoy.filter((v: any) => v.metodoPago === "pos" || v.metodoPago === "tarjeta").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
@@ -1499,11 +1499,11 @@ export default function Caja() {
               <div className="bg-green-600 text-white p-4 rounded-lg">
                 <h3 className="font-bold text-lg mb-2">💵 Efectivo en Caja</h3>
                 {(() => {
-  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
-  const hoy = formatter.format(new Date());
+                  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+                  const hoy = formatter.format(new Date());
                   const comprasHoy = compras.filter(c => c.fecha === hoy);
                   const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
-                  const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
+                  const ventasHoy = ventasDelDia.filter((v: any) => (v.fecha?.split(" ")[0] === hoy || v.fecha === hoy) && !v.eliminado);
                   const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
                   const efectivoCaja = montoInicialGuardado + inyeccionCompras + ventasEfectivo - totalCompras - totalEgresos;
                   return (
