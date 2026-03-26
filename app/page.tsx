@@ -26,11 +26,7 @@ export default function Login() {
         if (docSnap.exists()) {
           const datos = docSnap.data();
           setRol(datos.rol);
-          if (datos.rol === "cocina") {
-            router.push("/inventario?vista=stock");
-          } else if (datos.rol === "admin" || datos.rol === "jefe") {
-            router.push("/menu");
-          }
+          router.push("/menu");
         }
       } else {
         setRol(null);
@@ -49,12 +45,7 @@ export default function Login() {
       const userDoc = await getDoc(doc(db, "usuarios", userCredential.user.uid));
       
       if (userDoc.exists()) {
-        const datos = userDoc.data();
-        if (datos.rol === "cocina") {
-          router.push("/inventario?vista=stock");
-        } else if (datos.rol === "admin" || datos.rol === "jefe") {
-          router.push("/menu");
-        }
+        router.push("/menu");
       } else {
         await setDoc(doc(db, "usuarios", userCredential.user.uid), {
           email: email,
