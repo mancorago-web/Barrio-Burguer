@@ -1248,9 +1248,21 @@ export default function Ventas() {
                     }`}>
                       {pedido.mesa}
                     </span>
-                    <div className="text-right">
-                      <span className="text-sm text-gray-500 block">{pedido.fecha}</span>
-                      <span className="text-sm text-gray-500">{pedido.hora}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="text-right">
+                        <span className="text-sm text-gray-500 block">{pedido.fecha}</span>
+                        <span className="text-sm text-gray-500">{pedido.hora}</span>
+                      </div>
+                      {pedido.estado !== "listo" ? (
+                        <button
+                          onClick={() => marcarPedidoListo(pedido.id)}
+                          className="bg-green-500 text-white px-3 py-1 rounded text-sm font-bold hover:bg-green-600"
+                        >
+                          Listo
+                        </button>
+                      ) : (
+                        <span className="text-green-600 font-bold text-sm">✓</span>
+                      )}
                     </div>
                   </div>
                   <ul className="space-y-1">
@@ -1260,17 +1272,6 @@ export default function Ventas() {
                       </li>
                     ))}
                   </ul>
-                  {pedido.estado !== "listo" && (
-                    <button
-                      onClick={() => marcarPedidoListo(pedido.id)}
-                      className="mt-3 w-full bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600"
-                    >
-                      ✅ Listo
-                    </button>
-                  )}
-                  {pedido.estado === "listo" && (
-                    <p className="mt-3 text-center text-green-600 font-bold">✓ Pedido Listo</p>
-                  )}
                 </div>
               ))}
             </div>
