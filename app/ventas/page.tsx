@@ -481,27 +481,27 @@ export default function Ventas() {
       
       await setDoc(abiertosRef, { pedidos: pedidosActualizados }, { merge: true });
       
-      // Enviar a cocina solo si es la primera vez que se registra (no si ya estaba abierta)
-      if (!pedidoExistente) {
-        const cocinaRef = doc(db, "cocina", "pedidos");
-        const cocinaSnap = await getDoc(cocinaRef);
-        const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
-        
-        const pedidoCocina = {
-          id: Date.now(),
-          mesa: mesaSeleccionada,
-          productos: pedido.map((item: ItemPedido) => ({
-            nombre: item.producto.nombre,
-            cantidad: item.cantidad
-          })),
-          hora,
-          fecha,
-          usuario: nombreUsuario,
-          estado: "pendiente"
-        };
-        
-        await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
-      }
+      // Enviar a cocina siempre (primera vez o adicionales)
+      const cocinaRef = doc(db, "cocina", "pedidos");
+      const cocinaSnap = await getDoc(cocinaRef);
+      const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+      
+      const esAdicional = !!pedidoExistente;
+      const pedidoCocina = {
+        id: Date.now(),
+        mesa: esAdicional ? `${mesaSeleccionada} - Adicional` : mesaSeleccionada,
+        productos: pedido.map((item: ItemPedido) => ({
+          nombre: item.producto.nombre,
+          cantidad: item.cantidad
+        })),
+        hora,
+        fecha,
+        usuario: nombreUsuario,
+        estado: "pendiente",
+        esAdicional
+      };
+      
+      await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
       
       const nuevosPedidosMesas = { ...pedidosMesas };
       delete nuevosPedidosMesas[mesaSeleccionada];
@@ -1249,6 +1249,7 @@ export default function Ventas() {
                 <div key={pedido.id || idx} className={`border rounded-lg p-3 ${pedido.estado === "listo" ? "bg-green-100" : "bg-red-50"}`}>
                   <div className="flex justify-between items-center mb-2">
                     <span className={`font-bold text-lg px-2 py-1 rounded ${
+                      pedido.esAdicional ? "bg-purple-500 text-white" :
                       pedido.mesa === "Personal" ? "bg-red-500 text-white" :
                       pedido.mesa === "Máncora Go!" ? "bg-orange-500 text-white" :
                       pedido.mesa === "Llevar" ? "bg-blue-500 text-white" :
