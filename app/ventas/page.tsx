@@ -65,6 +65,9 @@ export default function Ventas() {
       const userRol = userDoc.data().rol || "cocina";
       setNombreUsuario(nombre);
       setRol(userRol);
+      if (userRol === "cocina") {
+        setVista("cocina");
+      }
       setVerificando(false);
     });
     
