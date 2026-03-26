@@ -547,19 +547,23 @@ export default function Ventas() {
       
       <div className="container mx-auto p-3 md:p-4">
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          <button 
-            onClick={() => setVista("salon")} 
-            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "salon" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
-          >
-            🏠 Salón
-          </button>
-          <button 
-            onClick={() => setVista("registro")} 
-            className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "registro" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
-          >
-            📊 Registro
-          </button>
-          {(rol === "admin" || rol === "cocina") && (
+          {(rol === "admin" || rol === "jefe") && (
+            <>
+              <button 
+                onClick={() => setVista("salon")} 
+                className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "salon" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
+              >
+                🏠 Salón
+              </button>
+              <button 
+                onClick={() => setVista("registro")} 
+                className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "registro" ? "bg-purple-600 text-white" : "bg-white text-gray-700"}`}
+              >
+                📊 Registro
+              </button>
+            </>
+          )}
+          {rol === "cocina" && (
             <button 
               onClick={() => setVista("cocina")} 
               className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "cocina" ? "bg-red-600 text-white" : "bg-white text-gray-700"}`}
