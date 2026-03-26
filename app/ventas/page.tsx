@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import * as XLSX from "xlsx";
 import { getFreshServerDate } from "@/lib/serverDate";
 
@@ -23,7 +23,7 @@ interface ItemPedido {
 export default function Ventas() {
   const router = useRouter();
   const [verificando, setVerificando] = useState(true);
-  const [vista, setVista] = useState<"salon" | "delivery" | "registro">("salon");
+  const [vista, setVista] = useState<"salon" | "delivery" | "registro" | "cocina">("salon");
   const [tomarPedido, setTomarPedido] = useState(false);
   const [productos, setProductos] = useState<ProductoVenta[]>([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>("hamburguesa");
@@ -43,6 +43,8 @@ export default function Ventas() {
   const [recetas, setRecetas] = useState<any[]>([]);
   const [inventario, setInventario] = useState<any[]>([]);
   const [guardandoPedido, setGuardandoPedido] = useState(false);
+  const [pedidosCocina, setPedidosCocina] = useState<any[]>([]);
+  const [rol, setRol] = useState<string>("cocina");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -58,7 +60,9 @@ export default function Ventas() {
         return;
       }
       const nombre = userDoc.data().nombre || "Usuario";
+      const userRol = userDoc.data().rol || "cocina";
       setNombreUsuario(nombre);
+      setRol(userRol);
       setVerificando(false);
     });
     
@@ -146,6 +150,20 @@ export default function Ventas() {
       const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
       setFechaFiltroVentas(formatter.format(new Date()));
       cargarVentas();
+    }
+  }, [vista]);
+
+  useEffect(() => {
+    if (vista === "cocina") {
+      const cocinaRef = doc(db, "cocina", "pedidos");
+      const unsubscribe = onSnapshot(cocinaRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setPedidosCocina(snapshot.data().pedidos || []);
+        } else {
+          setPedidosCocina([]);
+        }
+      });
+      return () => unsubscribe();
     }
   }, [vista]);
 
@@ -335,6 +353,27 @@ export default function Ventas() {
         await setDoc(abiertosRef, { pedidos: pedidosFiltrados }, { merge: true });
       }
       
+      // Enviar copia a cocina
+      if (!esPersonal) {
+        const cocinaRef = doc(db, "cocina", "pedidos");
+        const cocinaSnap = await getDoc(cocinaRef);
+        const pedidosCocinaAnteriores = cocinaSnap.exists() ? cocinaSnap.data().pedidos || [] : [];
+        
+        const pedidoCocina = {
+          id: Date.now(),
+          mesa: mesaSeleccionada,
+          productos: pedido.map((item: ItemPedido) => ({
+            nombre: item.producto.nombre,
+            cantidad: item.cantidad
+          })),
+          hora,
+          usuario: nombreUsuario,
+          estado: "pendiente"
+        };
+        
+        await setDoc(cocinaRef, { pedidos: [pedidoCocina, ...pedidosCocinaAnteriores] }, { merge: true });
+      }
+      
       const nuevosPedidosMesas = { ...pedidosMesas };
       delete nuevosPedidosMesas[mesaSeleccionada];
       setPedidosMesas(nuevosPedidosMesas);
@@ -471,6 +510,14 @@ export default function Ventas() {
           >
             📊 Registro
           </button>
+          {(rol === "admin" || rol === "cocina") && (
+            <button 
+              onClick={() => setVista("cocina")} 
+              className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "cocina" ? "bg-red-600 text-white" : "bg-white text-gray-700"}`}
+            >
+              👨‍🍳 Cocina
+            </button>
+          )}
         </div>
 
         {vista === "salon" && (
@@ -1133,6 +1180,57 @@ export default function Ventas() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {vista === "cocina" && (
+        <div className="bg-white rounded-lg shadow p-3 md:p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-base md:text-lg font-bold">👨‍🍳 Pedidos para Cocina</h2>
+            <button 
+              onClick={() => {
+                const cocinaRef = doc(db, "cocina", "pedidos");
+                setDoc(cocinaRef, { pedidos: [] });
+                setPedidosCocina([]);
+              }}
+              className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-300"
+            >
+              🗑️ Limpiar
+            </button>
+          </div>
+          
+          {pedidosCocina.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No hay pedidos pendientes</p>
+          ) : (
+            <div className="space-y-3">
+              {pedidosCocina.map((pedido, idx) => (
+                <div key={pedido.id || idx} className="border rounded-lg p-3 bg-red-50">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-bold text-lg">{pedido.mesa}</span>
+                    <span className="text-sm text-gray-500">{pedido.hora}</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {pedido.productos?.map((item: any, i: number) => (
+                      <li key={i} className="flex justify-between items-center py-1 border-b border-red-100 last:border-0">
+                        <span className="font-medium">{item.cantidad}x {item.nombre}</span>
+                        <button 
+                          onClick={async () => {
+                            const nuevosPedidos = pedidosCocina.filter((_, index) => index !== idx);
+                            setPedidosCocina(nuevosPedidos);
+                            const cocinaRef = doc(db, "cocina", "pedidos");
+                            await setDoc(cocinaRef, { pedidos: nuevosPedidos });
+                          }}
+                          className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600"
+                        >
+                          ✓ Listo
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </main>
