@@ -229,11 +229,14 @@ export default function Ventas() {
     const serverDate = await getFreshServerDate();
     const { fecha, hora } = serverDate;
 
-    const totalConPropina = getTotalConPropina();
+    const esPersonal = mesaSeleccionada === "Personal";
+    const totalOriginal = getTotal();
+    const totalBase = esPersonal ? 0 : totalOriginal;
+    const totalConPropina = esPersonal ? 0 : getTotalConPropina();
     const esMancoraGo = mesaSeleccionada === "Máncora Go!";
-    const tipoVenta = esMancoraGo ? "delivery" : "salon";
+    const tipoVenta = esMancoraGo ? "delivery" : esPersonal ? "personal" : "salon";
     const comisionMancoraGo = esMancoraGo ? getTotal() * 0.10 : 0;
-    const totalFinal = esMancoraGo ? totalConPropina - comisionMancoraGo : totalConPropina;
+    const totalFinal = esPersonal ? 0 : (esMancoraGo ? totalConPropina - comisionMancoraGo : totalConPropina);
 
     try {
       const nuevoPedido = {
@@ -241,19 +244,20 @@ export default function Ventas() {
       tipo: tipoVenta,
       mesa: mesaSeleccionada,
       productos: pedido,
-      total: getTotal(),
+      total: totalBase,
       totalConPropina: totalFinal,
-      totalOriginal: getTotal(),
+      totalOriginal: totalOriginal,
       comision: comisionMancoraGo,
       fecha,
       hora,
       usuario: nombreUsuario,
       estado: "completado",
-      metodoPago,
-      montoRecibido: metodoPago === "efectivo" ? montoRecibido : totalFinal,
-      cambio: metodoPago === "efectivo" ? montoRecibido - totalFinal : 0,
+      metodoPago: esPersonal ? "personal" : metodoPago,
+      montoRecibido: esPersonal ? 0 : (metodoPago === "efectivo" ? montoRecibido : totalFinal),
+      cambio: esPersonal ? 0 : (metodoPago === "efectivo" ? montoRecibido - totalFinal : 0),
       fechaCierre: null,
-      propina: getTotalConPropina() - getTotal()
+      propina: 0,
+      esPersonal: esPersonal
     };
       const ventasRef = doc(db, "ventas", "pedidos");
       const ventasSnap = await getDoc(ventasRef);
@@ -499,14 +503,14 @@ export default function Ventas() {
             {tomarPedido && (
               <div className="mb-4">
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Llevar", "Máncora Go!"].map(mesa => (
+                  {["Mesa 1", "Mesa 2", "Mesa 3", "Mesa 4", "Mesa 5", "Mesa 6", "Llevar", "Máncora Go!", "Personal"].map(mesa => (
                     <button
                       key={mesa}
                       onClick={() => {
                         setMesaSeleccionada(mesa);
                         setPedido(pedidosMesas[mesa] || []);
                       }}
-                      className={`px-3 py-2 rounded text-sm ${mesaSeleccionada === mesa ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+                      className={`px-3 py-2 rounded text-sm ${mesaSeleccionada === mesa ? mesa === "Personal" ? "bg-red-600 text-white" : "bg-purple-600 text-white" : "bg-gray-200"}`}
                     >
                       {mesa}
                     </button>
