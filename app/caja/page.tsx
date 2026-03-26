@@ -81,6 +81,7 @@ export default function Caja() {
   const [guardandoCompra, setGuardandoCompra] = useState(false);
   const [modalRegistrarCompra, setModalRegistrarCompra] = useState(false);
   const [comprasARegistrar, setComprasARegistrar] = useState<Record<string, number>>({});
+  const [compraManual, setCompraManual] = useState({ nombre: "", stockActual: "", porPedir: "", costoUnitario: "" });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -1226,23 +1227,99 @@ export default function Caja() {
                         );
                       })}
                   </tbody>
+                  <tbody>
+                    <tr className="border-t-2 border-dashed border-orange-400 bg-yellow-50">
+                      <td className="p-2">
+                        <input 
+                          type="text"
+                          placeholder="Nombre del producto..."
+                          className="w-full border border-orange-300 rounded px-2 py-1 text-sm"
+                          value={compraManual.nombre}
+                          onChange={(e) => setCompraManual({ ...compraManual, nombre: e.target.value })}
+                        />
+                      </td>
+                      <td className="p-2">-</td>
+                      <td className="p-2">-</td>
+                      <td className="p-2">
+                        <input 
+                          type="number"
+                          step="0.01"
+                          placeholder="0"
+                          className="w-16 md:w-20 text-center border border-orange-300 rounded px-1 py-1 text-sm"
+                          value={compraManual.stockActual}
+                          onChange={(e) => setCompraManual({ ...compraManual, stockActual: e.target.value })}
+                        />
+                      </td>
+                      <td className="p-2">-</td>
+                      <td className="p-2">
+                        <input 
+                          type="number"
+                          step="0.01"
+                          placeholder="0"
+                          className="w-16 md:w-20 text-center border border-orange-300 rounded px-1 py-1 text-sm"
+                          value={compraManual.porPedir}
+                          onChange={(e) => setCompraManual({ ...compraManual, porPedir: e.target.value })}
+                        />
+                      </td>
+                      <td className="p-2">
+                        <input 
+                          type="number"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="w-16 md:w-20 text-center border border-orange-300 rounded px-1 py-1 text-sm"
+                          value={compraManual.costoUnitario}
+                          onChange={(e) => setCompraManual({ ...compraManual, costoUnitario: e.target.value })}
+                        />
+                      </td>
+                      <td className="p-2 text-right font-bold text-orange-600">
+                        S/.{((parseFloat(compraManual.porPedir) || 0) * (parseFloat(compraManual.costoUnitario) || 0)).toFixed(2)}
+                      </td>
+                    </tr>
+                  </tbody>
                 </table>
                 {productosPorPedir.length === 0 && (
                   <p className="text-center text-gray-500 py-4">No hay productos en la lista de compras. Envíe la lista desde Stock.</p>
                 )}
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+                <button 
+                  onClick={() => {
+                    if (!compraManual.nombre || !compraManual.porPedir) {
+                      alert("Ingrese el nombre y la cantidad a pedir");
+                      return;
+                    }
+                    const nuevaCompra = {
+                      id: `manual_${Date.now()}`,
+                      nombre: compraManual.nombre,
+                      proveedor: "Manual",
+                      numero: "-",
+                      stockActual: parseFloat(compraManual.stockActual) || 0,
+                      stockMinimo: 0,
+                      porPedir: parseFloat(compraManual.porPedir) || 0,
+                      precioCompra: parseFloat(compraManual.costoUnitario) || 0,
+                      unidad: "",
+                      esManual: true
+                    };
+                    setProductosPorPedir([...productosPorPedir, nuevaCompra]);
+                    setCompraManual({ nombre: "", stockActual: "", porPedir: "", costoUnitario: "" });
+                  }}
+                  className="bg-orange-600 text-white px-3 py-2 rounded text-sm hover:bg-orange-700"
+                >
+                  + Agregar
+                </button>
                 <div className="bg-green-100 px-4 py-2 rounded">
                   {(() => {
                     const itemsConPedido = productosPorPedir.filter(p => (p.porPedir !== undefined ? p.porPedir : 0) > 0);
-                    const total = itemsConPedido.reduce((acc, p) => {
+                    const totalBase = itemsConPedido.reduce((acc, p) => {
                       const porPedir = p.porPedir !== undefined ? p.porPedir : 0;
                       return acc + (porPedir * (p.precioCompra || 0));
                     }, 0);
+                    const totalManual = (parseFloat(compraManual.porPedir) || 0) * (parseFloat(compraManual.costoUnitario) || 0);
+                    const totalFinal = totalBase + (compraManual.nombre ? totalManual : 0);
                     return (
                       <p className="font-bold text-green-800">
-                        Total: S/.{total.toFixed(2)} ({itemsConPedido.length} items)
+                        Total: S/.{totalFinal.toFixed(2)} ({itemsConPedido.length + (compraManual.nombre ? 1 : 0)} items)
                       </p>
                     );
                   })()}
