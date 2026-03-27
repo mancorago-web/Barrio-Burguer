@@ -95,14 +95,22 @@ export default function Ventas() {
         if (recetasSnap.exists()) {
           const datos = recetasSnap.data();
             if (datos.productosVenta) {
-            let productosActualizados = datos.productosVenta.filter((p: any) => p.categoria !== "extras");
+            let productosActualizados = datos.productosVenta.filter((p: any) => p.categoria !== "extras" && p.categoria !== "detalles");
             const extrasProductos = [
               { id: 901, nombre: "Tocino", precio: 3.00, categoria: "extras" },
               { id: 902, nombre: "Queso Extra", precio: 2.00, categoria: "extras" },
               { id: 904, nombre: "Carne Extra", precio: 5.00, categoria: "extras" },
               { id: 907, nombre: "Pickles", precio: 2.00, categoria: "extras" },
             ];
-            productosActualizados = [...productosActualizados, ...extrasProductos];
+            const detallesProductos = [
+              { id: 910, nombre: "Sin Verduras", precio: 0, categoria: "detalles" },
+              { id: 911, nombre: "Sin Salsas", precio: 0, categoria: "detalles" },
+              { id: 912, nombre: "Sin Cebolla", precio: 0, categoria: "detalles" },
+              { id: 913, nombre: "Sin Tomate", precio: 0, categoria: "detalles" },
+              { id: 914, nombre: "Sin Queso", precio: 0, categoria: "detalles" },
+              { id: 915, nombre: "Sin Papas", precio: 0, categoria: "detalles" },
+            ];
+            productosActualizados = [...productosActualizados, ...extrasProductos, ...detallesProductos];
             await setDoc(doc(db, "recetas", "datos"), { productosVenta: productosActualizados }, { merge: true });
             setProductos(productosActualizados);
           }
@@ -674,7 +682,7 @@ export default function Ventas() {
                     <div className="border-t pt-3 mb-3">
                       <h3 className="font-bold text-sm text-gray-600 mb-2">⭐ Extras y detalles:</h3>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4">
                       {productos
                         .filter(p => p.categoria === "extras")
                         .map(producto => (
@@ -685,6 +693,23 @@ export default function Ventas() {
                           >
                             <p className="font-medium text-gray-800 text-xs md:text-sm truncate">{producto.nombre}</p>
                             <p className="text-orange-600 font-bold text-sm md:text-base">S/.{producto.precio.toFixed(2)}</p>
+                          </button>
+                        ))}
+                    </div>
+
+                    <div className="border-t pt-3 mb-3">
+                      <h3 className="font-bold text-sm text-gray-600 mb-2">❌ Sin...</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                      {productos
+                        .filter(p => p.categoria === "detalles")
+                        .map(producto => (
+                          <button
+                            key={producto.id}
+                            onClick={() => agregarAlPedido(producto)}
+                            className="border border-cyan-200 rounded-lg p-2 md:p-3 hover:border-cyan-500 hover:bg-cyan-50 transition text-left bg-cyan-50"
+                          >
+                            <p className="font-medium text-gray-800 text-xs md:text-sm truncate">{producto.nombre}</p>
                           </button>
                         ))}
                     </div>
