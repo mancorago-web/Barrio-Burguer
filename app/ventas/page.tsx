@@ -47,6 +47,43 @@ export default function Ventas() {
   const [verRegistroCocina, setVerRegistroCocina] = useState(false);
   const [fechaFiltroCocina, setFechaFiltroCocina] = useState("");
   const [rol, setRol] = useState<string>("cocina");
+  const [notificacionCocina, setNotificacionCocina] = useState(false);
+  const [nuevoPedidoInfo, setNuevoPedidoInfo] = useState<{mesa: string, productos: number} | null>(null);
+
+  const playNotificationSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = "sine";
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+      
+      setTimeout(() => {
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.frequency.value = 1000;
+        osc2.type = "sine";
+        gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        osc2.start(audioContext.currentTime);
+        osc2.stop(audioContext.currentTime + 0.3);
+      }, 200);
+    } catch (e) {
+      console.log("Audio not supported");
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -185,11 +222,31 @@ export default function Ventas() {
       const unsubscribe = onSnapshot(cocinaRef, (snapshot) => {
         if (snapshot.exists()) {
           const todosPedidos = snapshot.data().pedidos || [];
+          let pedidosFiltrados = todosPedidos;
+          
           if (verRegistroCocina) {
-            setPedidosCocina(todosPedidos);
+            pedidosFiltrados = todosPedidos;
           } else {
-            const pedidosHoy = todosPedidos.filter((p: any) => p.fecha === fechaHoy);
-            setPedidosCocina(pedidosHoy);
+            pedidosFiltrados = todosPedidos.filter((p: any) => p.fecha === fechaHoy);
+          }
+          
+          const pedidoAnterior = pedidosCocina;
+          setPedidosCocina(pedidosFiltrados);
+          
+          if (!verRegistroCocina && pedidosFiltrados.length > pedidoAnterior.length) {
+            const nuevosPedidos = pedidosFiltrados.filter((p: any) => 
+              !pedidoAnterior.some((anterior: any) => anterior.id === p.id)
+            );
+            if (nuevosPedidos.length > 0) {
+              const ultimoNuevo = nuevosPedidos[0];
+              setNuevoPedidoInfo({
+                mesa: ultimoNuevo.mesa,
+                productos: ultimoNuevo.productos?.length || 0
+              });
+              setNotificacionCocina(true);
+              playNotificationSound();
+              setTimeout(() => setNotificacionCocina(false), 4000);
+            }
           }
         } else {
           setPedidosCocina([]);
@@ -1321,7 +1378,19 @@ export default function Ventas() {
             </button>
           </div>
           
-          {pedidosCocina.length === 0 ? (
+          {notificacionCocina && (
+            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-4 rounded-lg shadow-xl animate-pulse">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🔔</span>
+                <div>
+                  <p className="font-bold text-lg">¡Nuevo Pedido!</p>
+                  <p className="text-sm">{nuevoPedidoInfo?.mesa} - {nuevoPedidoInfo?.productos} productos</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {pedidosCocina.length === 0 && !notificacionCocina ? (
             <p className="text-gray-500 text-center py-8">No hay pedidos en cocina</p>
           ) : (
             <div className="space-y-3">
