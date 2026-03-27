@@ -828,7 +828,7 @@ export default function Ventas() {
                     "Mesa": v.mesa || v.tipo || "-",
                     "Subtotal": v.total || 0,
                     "Propina": v.propina || 0,
-                    "Total": v.totalConPropina || v.total || 0,
+                    "Total": v.total || 0,
                     "Método": v.metodoPago === "efectivo" ? "Efectivo" : v.metodoPago === "yape" ? "Yape" : v.metodoPago === "pos" ? "POS" : v.metodoPago || "-",
                     "Usuario": v.usuario || "-",
                     "Productos": v.productos?.map((p: any) => `${p.cantidad}x ${p.producto?.nombre || "N/A"}`).join(", ") || "-"
@@ -854,13 +854,13 @@ export default function Ventas() {
                   return bMinutes - aMinutes;
                 });
               const ventasActivas = ventasFiltradas.filter(v => !v.eliminado);
-              const totalDia = ventasActivas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const totalDia = ventasActivas.reduce((acc, v) => acc + (v.total || 0), 0);
               const totalPropinas = ventasActivas.reduce((acc, v) => acc + (v.propina || 0), 0);
-              const totalEfectivo = ventasActivas.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-              const totalYape = ventasActivas.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
-              const totalPos = ventasActivas.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const totalEfectivo = ventasActivas.filter(v => v.metodoPago === "efectivo").reduce((acc, v) => acc + (v.total || 0), 0);
+              const totalYape = ventasActivas.filter(v => v.metodoPago === "yape").reduce((acc, v) => acc + (v.total || 0), 0);
+              const totalPos = ventasActivas.filter(v => v.metodoPago === "pos").reduce((acc, v) => acc + (v.total || 0), 0);
               const ventasEliminadas = ventasFiltradas.filter(v => v.eliminado);
-              const totalEliminadas = ventasEliminadas.reduce((acc, v) => acc + (v.totalConPropina || v.total || 0), 0);
+              const totalEliminadas = ventasEliminadas.reduce((acc, v) => acc + (v.total || 0), 0);
               
               return (
                 <>
@@ -934,10 +934,10 @@ export default function Ventas() {
                             </div>
                             <div className="flex flex-col items-end gap-2 ml-2">
                               {v.eliminado ? (
-                                <span className="font-bold text-gray-500 line-through">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
+                                <span className="font-bold text-gray-500 line-through">S/.{(v.total || 0).toFixed(2)}</span>
                               ) : (
                                 <>
-                                  <span className="font-bold text-green-600">S/.{(v.totalConPropina || v.total || 0).toFixed(2)}</span>
+                                  <span className="font-bold text-green-600">S/.{(v.total || 0).toFixed(2)}</span>
                                   <button
                                     onClick={() => eliminarVenta(v.id)}
                                     className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
