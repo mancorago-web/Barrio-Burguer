@@ -94,21 +94,16 @@ export default function Ventas() {
         const recetasSnap = await getDoc(doc(db, "recetas", "datos"));
         if (recetasSnap.exists()) {
           const datos = recetasSnap.data();
-          if (datos.productosVenta) {
-            let productosActualizados = datos.productosVenta;
-            const tieneExtras = productosActualizados.some((p: any) => p.categoria === "extras");
-            if (!tieneExtras) {
-              const extrasProductos = [
-                { id: 901, nombre: "Tocino", precio: 3.00, categoria: "extras" },
-                { id: 902, nombre: "Queso Extra", precio: 2.00, categoria: "extras" },
-                { id: 903, nombre: "Huevo", precio: 2.50, categoria: "extras" },
-                { id: 904, nombre: "Carne Extra", precio: 8.00, categoria: "extras" },
-                { id: 905, nombre: "Ajo Tostado", precio: 1.50, categoria: "extras" },
-                { id: 906, nombre: "Palta", precio: 3.00, categoria: "extras" },
-              ];
-              productosActualizados = [...productosActualizados, ...extrasProductos];
-              await setDoc(doc(db, "recetas", "datos"), { productosVenta: productosActualizados }, { merge: true });
-            }
+            if (datos.productosVenta) {
+            let productosActualizados = datos.productosVenta.filter((p: any) => p.categoria !== "extras");
+            const extrasProductos = [
+              { id: 901, nombre: "Tocino", precio: 3.00, categoria: "extras" },
+              { id: 902, nombre: "Queso Extra", precio: 2.00, categoria: "extras" },
+              { id: 904, nombre: "Carne Extra", precio: 5.00, categoria: "extras" },
+              { id: 907, nombre: "Pickles", precio: 2.00, categoria: "extras" },
+            ];
+            productosActualizados = [...productosActualizados, ...extrasProductos];
+            await setDoc(doc(db, "recetas", "datos"), { productosVenta: productosActualizados }, { merge: true });
             setProductos(productosActualizados);
           }
           if (datos.recetas) {
