@@ -95,7 +95,21 @@ export default function Ventas() {
         if (recetasSnap.exists()) {
           const datos = recetasSnap.data();
           if (datos.productosVenta) {
-            setProductos(datos.productosVenta);
+            let productosActualizados = datos.productosVenta;
+            const tieneExtras = productosActualizados.some((p: any) => p.categoria === "extras");
+            if (!tieneExtras) {
+              const extrasProductos = [
+                { id: 901, nombre: "Tocino", precio: 3.00, categoria: "extras" },
+                { id: 902, nombre: "Queso Extra", precio: 2.00, categoria: "extras" },
+                { id: 903, nombre: "Huevo", precio: 2.50, categoria: "extras" },
+                { id: 904, nombre: "Carne Extra", precio: 8.00, categoria: "extras" },
+                { id: 905, nombre: "Ajo Tostado", precio: 1.50, categoria: "extras" },
+                { id: 906, nombre: "Palta", precio: 3.00, categoria: "extras" },
+              ];
+              productosActualizados = [...productosActualizados, ...extrasProductos];
+              await setDoc(doc(db, "recetas", "datos"), { productosVenta: productosActualizados }, { merge: true });
+            }
+            setProductos(productosActualizados);
           }
           if (datos.recetas) {
             setRecetas(datos.recetas);
@@ -525,6 +539,7 @@ export default function Ventas() {
       case "combos": return "📦 Combos";
       case "acompanamiento": return "🍟 Acompañamientos";
       case "bebida": return "🥤 Bebidas";
+      case "extras": return "⭐ Extras";
       default: return cat;
     }
   };
@@ -658,6 +673,28 @@ export default function Ventas() {
                       </button>
                     ))}
                 </div>
+
+                {categoriaSeleccionada === "hamburguesa" && (
+                  <>
+                    <div className="border-t pt-3 mb-3">
+                      <h3 className="font-bold text-sm text-gray-600 mb-2">⭐ Extras y detalles:</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                      {productos
+                        .filter(p => p.categoria === "extras")
+                        .map(producto => (
+                          <button
+                            key={producto.id}
+                            onClick={() => agregarAlPedido(producto)}
+                            className="border border-orange-200 rounded-lg p-2 md:p-3 hover:border-orange-500 hover:bg-orange-50 transition text-left bg-orange-50"
+                          >
+                            <p className="font-medium text-gray-800 text-xs md:text-sm truncate">{producto.nombre}</p>
+                            <p className="text-orange-600 font-bold text-sm md:text-base">S/.{producto.precio.toFixed(2)}</p>
+                          </button>
+                        ))}
+                    </div>
+                  </>
+                )}
 
                 {pedido.length > 0 && (
                   <div className="border-t pt-3 md:pt-4 mt-3 md:mt-4">
