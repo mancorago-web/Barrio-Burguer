@@ -1078,12 +1078,6 @@ export default function Caja() {
                 >
                   📋 Cierres
                 </button>
-                <button 
-                  onClick={exportarCierreExcel}
-                  className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
-                >
-                  📥 Exportar
-                </button>
               </div>
             </div>
           )}
