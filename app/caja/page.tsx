@@ -500,8 +500,6 @@ export default function Caja() {
   };
 
   const guardarMontoInicial = async () => {
-    if (montoInicial <= 0) return;
-    
     const ahora = new Date();
     const fecha = ahora.toISOString().split("T")[0];
     const fechaHora = `${ahora.toLocaleDateString()} ${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
@@ -871,6 +869,7 @@ export default function Caja() {
                   value={montoInicial}
                   onChange={(e) => setMontoInicial(parseFloat(e.target.value) || 0)}
                 />
+                <p className="text-xs text-gray-500 mt-1">Puedes ingresar valores negativos para deudas</p>
                 {ultimaActualizacion && (
                   <p className="text-xs text-gray-500 mt-2">
                     Última actualización: {ultimaActualizacion.split(" - ")[0]}
