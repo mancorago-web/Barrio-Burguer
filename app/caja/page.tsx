@@ -759,7 +759,7 @@ export default function Caja() {
     
     const comprasHoy = compras.filter(c => c.fecha === hoy);
     const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
-    const ventasHoy = ventasDelDia.filter((v: any) => v.fecha?.split(" ")[0] === hoy || v.fecha === hoy);
+    const ventasHoy = ventasDelDia.filter((v: any) => (v.fecha?.split(" ")[0] === hoy || v.fecha === hoy) && !v.eliminado);
     const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
     const ventasYape = ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
     const ventasPOS = ventasHoy.filter((v: any) => v.metodoPago === "pos" || v.metodoPago === "tarjeta").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
@@ -1578,6 +1578,7 @@ export default function Caja() {
                       <th className="p-2 text-right">Ventas Efvo</th>
                       <th className="p-2 text-right">Ventas Yape</th>
                       <th className="p-2 text-right">Ventas POS</th>
+                      <th className="p-2 text-right bg-yellow-100">Total Ventas</th>
                       <th className="p-2 text-right">Egresos</th>
                       <th className="p-2 text-right">Efectivo Caja</th>
                     </tr>
@@ -1602,6 +1603,7 @@ export default function Caja() {
                         <td className="p-2 text-right text-green-600">S/.{c.ventasEfectivo?.toFixed(2) || "0.00"}</td>
                         <td className="p-2 text-right text-blue-600">S/.{c.ventasYape?.toFixed(2) || "0.00"}</td>
                         <td className="p-2 text-right text-purple-600">S/.{c.ventasPOS?.toFixed(2) || "0.00"}</td>
+                        <td className="p-2 text-right font-bold bg-yellow-50">S/.{c.totalVentas?.toFixed(2) || "0.00"}</td>
                         <td className="p-2 text-right text-red-600">S/.{c.totalEgresos?.toFixed(2) || "0.00"}</td>
                         <td className="p-2 text-right font-bold text-green-700">S/.{c.efectivoCaja?.toFixed(2) || "0.00"}</td>
                       </tr>
