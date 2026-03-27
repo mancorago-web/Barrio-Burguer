@@ -931,7 +931,11 @@ export default function Caja() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-base md:text-lg font-bold">Egresos en Efectivo</h2>
               <button 
-                onClick={() => setModalAbierto(true)}
+                onClick={async () => {
+                  const serverDate = await getFreshServerDate();
+                  setFecha(serverDate.fecha);
+                  setModalAbierto(true);
+                }}
                 className="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"
               >
                 + Egreso
