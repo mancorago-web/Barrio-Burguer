@@ -178,17 +178,33 @@ export default function Ventas() {
 
   useEffect(() => {
     if (vista === "cocina") {
+      const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+      const fechaHoy = formatter.format(new Date());
+      
       const cocinaRef = doc(db, "cocina", "pedidos");
       const unsubscribe = onSnapshot(cocinaRef, (snapshot) => {
         if (snapshot.exists()) {
-          setPedidosCocina(snapshot.data().pedidos || []);
+          const todosPedidos = snapshot.data().pedidos || [];
+          if (verRegistroCocina) {
+            setPedidosCocina(todosPedidos);
+          } else {
+            const pedidosHoy = todosPedidos.filter((p: any) => p.fecha === fechaHoy);
+            setPedidosCocina(pedidosHoy);
+          }
         } else {
           setPedidosCocina([]);
         }
       });
       return () => unsubscribe();
     }
-  }, [vista]);
+  }, [vista, verRegistroCocina]);
+
+  useEffect(() => {
+    if (verRegistroCocina) {
+      const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
+      setFechaFiltroCocina(formatter.format(new Date()));
+    }
+  }, [verRegistroCocina]);
 
   if (verificando) {
     return (
