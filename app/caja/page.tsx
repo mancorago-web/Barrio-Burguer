@@ -626,8 +626,8 @@ export default function Caja() {
   const hoy = hoyFormatter.format(new Date());
   const egresosActivos = egresos.filter(e => !e.eliminado);
   const egresosHoy = egresosActivos.filter(e => e.fecha === hoy);
-  const totalEgresos = egresosHoy.reduce((acc, e) => acc + e.monto, 0);
-  const montoFinalCalculado = montoInicialGuardado + inyeccionCompras - gastoCompras - totalEgresos;
+  const totalEgresos = Math.round(egresosHoy.reduce((acc, e) => acc + e.monto, 0) * 100) / 100;
+  const montoFinalCalculado = Math.round((montoInicialGuardado + inyeccionCompras - gastoCompras - totalEgresos) * 100) / 100;
 
   if (verificando) {
     return (
@@ -1461,7 +1461,7 @@ export default function Caja() {
                   const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
                   const hoy = formatter.format(new Date());
                   const comprasHoy = compras.filter(c => c.fecha === hoy);
-                  const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
+                  const totalCompras = Math.round(comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0) * 100) / 100;
                   return (
                     <>
                       <p className="text-2xl font-bold text-blue-800">S/.{totalCompras.toFixed(2)}</p>
@@ -1477,10 +1477,10 @@ export default function Caja() {
                   const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
                   const hoy = formatter.format(new Date());
                   const ventasHoy = ventasDelDia.filter((v: any) => (v.fecha?.split(" ")[0] === hoy || v.fecha === hoy) && !v.eliminado);
-                  const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
-                  const ventasYape = ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
-                  const ventasPOS = ventasHoy.filter((v: any) => v.metodoPago === "pos" || v.metodoPago === "tarjeta").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
-                  const totalVentas = ventasEfectivo + ventasYape + ventasPOS;
+                  const ventasEfectivo = Math.round(ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0) * 100) / 100;
+                  const ventasYape = Math.round(ventasHoy.filter((v: any) => v.metodoPago === "yape" || v.metodoPago === "yape/quimby").reduce((acc: number, v: any) => acc + (v.total || 0), 0) * 100) / 100;
+                  const ventasPOS = Math.round(ventasHoy.filter((v: any) => v.metodoPago === "pos" || v.metodoPago === "tarjeta").reduce((acc: number, v: any) => acc + (v.total || 0), 0) * 100) / 100;
+                  const totalVentas = Math.round((ventasEfectivo + ventasYape + ventasPOS) * 100) / 100;
                   
                   return (
                     <>
@@ -1517,10 +1517,10 @@ export default function Caja() {
                   const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" });
                   const hoy = formatter.format(new Date());
                   const comprasHoy = compras.filter(c => c.fecha === hoy);
-                  const totalCompras = comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0);
+                  const totalCompras = Math.round(comprasHoy.reduce((acc, c) => acc + (c.total || 0), 0) * 100) / 100;
                   const ventasHoy = ventasDelDia.filter((v: any) => (v.fecha?.split(" ")[0] === hoy || v.fecha === hoy) && !v.eliminado);
-                  const ventasEfectivo = ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0);
-                  const efectivoCaja = montoInicialGuardado + inyeccionCompras + ventasEfectivo - totalCompras - totalEgresos;
+                  const ventasEfectivo = Math.round(ventasHoy.filter((v: any) => v.metodoPago === "efectivo").reduce((acc: number, v: any) => acc + (v.total || 0), 0) * 100) / 100;
+                  const efectivoCaja = Math.round((montoInicialGuardado + inyeccionCompras + ventasEfectivo - totalCompras - totalEgresos) * 100) / 100;
                   return (
                     <>
                       <p className="text-3xl font-bold text-center">S/.{efectivoCaja.toFixed(2)}</p>
