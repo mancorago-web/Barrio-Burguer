@@ -33,6 +33,7 @@ export default function Ventas() {
   const [metodoPago, setMetodoPago] = useState<"efectivo" | "yape" | "pos">("efectivo");
   const [montoRecibido, setMontoRecibido] = useState(0);
   const [propina, setPropina] = useState(0);
+  const [descuento, setDescuento] = useState(0);
   const [ventas, setVentas] = useState<any[]>([]);
   const [fechaFiltroVentas, setFechaFiltroVentas] = useState("");
   const [verRegistroDelivery, setVerRegistroDelivery] = useState(false);
@@ -323,7 +324,13 @@ export default function Ventas() {
   };
 
   const getTotalConPropina = () => {
-    return getTotal() + propina;
+    const subtotal = getTotal();
+    const montoDescuento = subtotal * (descuento / 100);
+    return subtotal - montoDescuento + propina;
+  };
+
+  const getMontoDescuento = () => {
+    return getTotal() * (descuento / 100);
   };
 
   const eliminarVenta = async (id: number) => {
@@ -361,7 +368,8 @@ export default function Ventas() {
 
     const esPersonal = mesaSeleccionada === "Personal";
     const totalOriginal = getTotal();
-    const totalBase = esPersonal ? 0 : totalOriginal;
+    const montoDescuento = totalOriginal * (descuento / 100);
+    const totalBase = esPersonal ? 0 : (totalOriginal - montoDescuento);
     const totalConPropina = esPersonal ? 0 : getTotalConPropina();
     const esMancoraGo = mesaSeleccionada === "Máncora Go!";
     const tipoVenta = esMancoraGo ? "delivery" : esPersonal ? "personal" : "salon";
@@ -377,6 +385,8 @@ export default function Ventas() {
       total: totalBase,
       totalConPropina: totalFinal,
       totalOriginal: totalOriginal,
+      descuento: descuento,
+      montoDescuento: montoDescuento,
       comision: comisionMancoraGo,
       fecha,
       hora,
@@ -833,7 +843,7 @@ export default function Ventas() {
                         Registrar
                       </button>
                       <button 
-                        onClick={() => setModalPago(true)}
+                        onClick={() => { setModalPago(true); setDescuento(0); }}
                         className="bg-green-600 text-white py-2 rounded text-sm hover:bg-green-700"
                       >
                         Cobrar
@@ -923,6 +933,7 @@ export default function Ventas() {
                             setPedido(pa.productos);
                             setTomarPedido(true);
                             setModalPago(true);
+                            setDescuento(0);
                           }}
                           className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
                         >
@@ -1242,6 +1253,12 @@ export default function Ventas() {
                       <span>Subtotal:</span>
                       <span className="font-bold">S/.{getTotal().toFixed(2)}</span>
                     </p>
+                    {descuento > 0 && (
+                      <p className="flex justify-between text-red-600">
+                        <span>Descuento ({descuento}%):</span>
+                        <span className="font-bold">- S/.{getMontoDescuento().toFixed(2)}</span>
+                      </p>
+                    )}
                     {propina > 0 && (
                       <p className="flex justify-between text-green-600">
                         <span>Propina:</span>
@@ -1259,8 +1276,54 @@ export default function Ventas() {
                   </div>
                 </div>
               ) : (
-                <p className="font-bold text-lg mb-1">Total a pagar: <span className="text-green-600">S/.{getTotalConPropina().toFixed(2)}</span></p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold">Subtotal:</span>
+                    <span className="font-bold">S/.{getTotal().toFixed(2)}</span>
+                  </div>
+                  {descuento > 0 && (
+                    <div className="flex justify-between items-center text-red-600">
+                      <span>Descuento ({descuento}%):</span>
+                      <span className="font-bold">- S/.{getMontoDescuento().toFixed(2)}</span>
+                    </div>
+                  )}
+                  {propina > 0 && (
+                    <div className="flex justify-between items-center text-green-600">
+                      <span>Propina:</span>
+                      <span className="font-bold">+ S/.{propina.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-lg font-bold border-t pt-2">
+                    <span>Total a pagar:</span>
+                    <span className="text-green-600">S/.{getTotalConPropina().toFixed(2)}</span>
+                  </div>
+                </div>
               )}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 font-bold mb-2">Descuento (%):</label>
+              <div className="flex gap-2">
+                {[0, 5, 10, 15, 20, 25, 30].map((pct) => (
+                  <button
+                    key={pct}
+                    onClick={() => setDescuento(pct)}
+                    className={`px-3 py-2 rounded text-sm font-bold ${descuento === pct ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+                  >
+                    {pct}%
+                  </button>
+                ))}
+              </div>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="Otro %"
+                className="w-full border mt-2 p-2 rounded"
+                value={descuento || ""}
+                onChange={(e) => setDescuento(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+              />
             </div>
 
             <div className="flex gap-2 mb-4">
@@ -1315,6 +1378,9 @@ export default function Ventas() {
                       {montoRecibido > 0 && (
                         <div className="mt-4 bg-blue-100 p-4 rounded">
                           <p className="text-gray-700">Subtotal: <span className="font-bold">S/.{getTotal().toFixed(2)}</span></p>
+                          {descuento > 0 && (
+                            <p className="text-red-600">Descuento ({descuento}%): <span className="font-bold">-S/.{getMontoDescuento().toFixed(2)}</span></p>
+                          )}
                           {propina > 0 && (
                             <p className="text-gray-700">Propina: <span className="font-bold text-green-600">S/.{propina.toFixed(2)}</span></p>
                           )}
@@ -1334,6 +1400,9 @@ export default function Ventas() {
                   {metodoPago !== "efectivo" && (
                     <div className="mb-4 bg-blue-50 p-3 rounded">
                       <p className="text-gray-700">Subtotal: <span className="font-bold">S/.{getTotal().toFixed(2)}</span></p>
+                      {descuento > 0 && (
+                        <p className="text-red-600">Descuento ({descuento}%): <span className="font-bold">-S/.{getMontoDescuento().toFixed(2)}</span></p>
+                      )}
                       {propina > 0 && (
                         <p className="text-gray-700">Propina: <span className="font-bold text-green-600">S/.{propina.toFixed(2)}</span></p>
                       )}
@@ -1349,7 +1418,7 @@ export default function Ventas() {
 
             <div className="flex gap-2 mt-4">
               <button 
-                onClick={() => { setModalPago(false); setMontoRecibido(0); setPropina(0); }}
+                onClick={() => { setModalPago(false); setMontoRecibido(0); setPropina(0); setDescuento(0); }}
                 className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
               >
                 Cancelar
