@@ -7,6 +7,12 @@
   --background-rgb: 255, 255, 255;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 html, body {
   height: 100%;
   margin: 0;
@@ -19,4 +25,45 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overscroll-behavior-y: contain;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+input, button, select {
+  font-size: 16px;
+}
+
+* {
+  will-change: auto;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.loading-spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #1d4ed8;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

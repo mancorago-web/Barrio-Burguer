@@ -30,12 +30,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
+        <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Barrio Burger" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#ea580c" />
+        <meta name="theme-color" content="#1d4ed8" />
       </head>
       <body className={inter.className}>
         <ServiceWorkerRegistration />
