@@ -47,7 +47,20 @@ export default function Menu() {
 
   return (
     <main className="min-h-screen bg-gray-100">
-      <header className="bg-orange-600 text-white p-3 md:p-4 shadow-lg">
+      <header 
+        className="text-white p-3 md:p-4 shadow-lg"
+        style={{
+          backgroundImage: `
+            linear-gradient(45deg, #1d4ed8 25%, transparent 25%),
+            linear-gradient(-45deg, #1d4ed8 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #1d4ed8 75%),
+            linear-gradient(-45deg, transparent 75%, #1d4ed8 75%)
+          `,
+          backgroundSize: '20px 20px',
+          backgroundColor: '#ffffff',
+          backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
+        }}
+      >
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src="/icons/icon-192x192.png" alt="Barrio Burger" className="w-10 h-10 md:w-12 md:h-12" />
