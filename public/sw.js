@@ -1,18 +1,6 @@
-const CACHE_NAME = 'barrio-burger-v1';
-const urlsToCache = [
-  '/',
-  '/menu',
-  '/ventas',
-  '/caja',
-  '/inventario',
-  '/dashboard'
-];
+const CACHE_NAME = 'barrio-burger-v2';
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
   self.skipWaiting();
 });
 
@@ -33,35 +21,16 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(response => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(event.request).then(response => {
+        const fetchPromise = fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            cache.put(event.request, networkResponse.clone());
           }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        });
-      })
-  );
-});
-
-self.addEventListener('push', event => {
-  const options = {
-    body: '¡Nuevo pedido en cocina!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
-    vibrate: [200, 100, 200],
-    tag: 'pedido-cocina'
-  };
-  event.waitUntil(
-    self.registration.showNotification('Barrio Burger', options)
+          return networkResponse;
+        }).catch(() => response);
+        return response || fetchPromise;
+      });
+    })
   );
 });
