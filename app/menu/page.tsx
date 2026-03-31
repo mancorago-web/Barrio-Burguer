@@ -49,9 +49,12 @@ export default function Menu() {
     <main className="min-h-screen bg-gray-100">
       <header className="bg-orange-600 text-white p-3 md:p-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-lg md:text-2xl font-bold text-center">
-            🍔 Barrio Burger
-          </h1>
+          <div className="flex items-center gap-3">
+            <img src="/icons/icon-192x192.png" alt="Barrio Burger" className="w-10 h-10 md:w-12 md:h-12" />
+            <h1 className="text-lg md:text-2xl font-bold">
+              Barrio Burger
+            </h1>
+          </div>
           <button 
             onClick={cerrarSesion}
             className="bg-red-500 px-3 py-2 md:px-4 md:py-2 rounded hover:bg-red-600 text-sm md:text-base"
