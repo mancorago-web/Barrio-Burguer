@@ -6,7 +6,7 @@ import HeaderTimer from "@/components/HeaderTimer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Hamburguesería",
+  title: "Barrio Burger",
   description: "Sistema de gestión",
 };
 
@@ -34,7 +34,7 @@ export default function RootLayout({
             fontSize: '14px',
             flexShrink: 0,
           }}>
-            BlakBox © 2026 | v1.0.0
+            Barrio Burger © 2026 | v1.0.0
           </footer>
         </div>
       </body>
