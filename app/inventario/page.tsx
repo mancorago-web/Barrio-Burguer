@@ -389,8 +389,6 @@ function InventarioContent() {
           {(rol === "admin" || rol === "jefe") && (
             <>
               <button onClick={() => setVista("recetas")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "recetas" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📋 Recetas</button>
-              <button onClick={() => setVista("movimientos")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "movimientos" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📝 Movimientos</button>
-              <button onClick={() => setVista("informe")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "informe" ? "bg-blue-600 text-white" : "bg-white text-gray-700"}`}>📊 Informe</button>
               <div className="flex-1"></div>
               <button onClick={() => setVista("baseDatos")} className={`px-3 py-2 rounded text-sm whitespace-nowrap ${vista === "baseDatos" ? "bg-green-600 text-white" : "bg-green-100 text-green-700"}`}>🗄️ Datos</button>
             </>
