@@ -34,6 +34,8 @@ export default function Ventas() {
   const [montoRecibido, setMontoRecibido] = useState(0);
   const [propina, setPropina] = useState(0);
   const [descuento, setDescuento] = useState(0);
+  const [pagoDividido, setPagoDividido] = useState(false);
+  const [pagosDivision, setPagosDivision] = useState<{metodo: string, monto: number}[]>([]);
   const [ventas, setVentas] = useState<any[]>([]);
   const [fechaFiltroVentas, setFechaFiltroVentas] = useState("");
   const [verRegistroDelivery, setVerRegistroDelivery] = useState(false);
@@ -333,6 +335,37 @@ export default function Ventas() {
     return getTotal() * (descuento / 100);
   };
 
+  const agregarPagoDivision = () => {
+    setPagosDivision([...pagosDivision, { metodo: "efectivo", monto: 0 }]);
+  };
+
+  const actualizarPagoDivision = (index: number, campo: "metodo" | "monto", valor: string | number) => {
+    const nuevosPagos = [...pagosDivision];
+    if (campo === "metodo") {
+      nuevosPagos[index].metodo = valor as string;
+    } else {
+      nuevosPagos[index].monto = typeof valor === "number" ? valor : parseFloat(valor as string) || 0;
+    }
+    setPagosDivision(nuevosPagos);
+  };
+
+  const eliminarPagoDivision = (index: number) => {
+    setPagosDivision(pagosDivision.filter((_, i) => i !== index));
+  };
+
+  const getTotalPagosDivision = () => {
+    return pagosDivision.reduce((acc, p) => acc + p.monto, 0);
+  };
+
+  const getMetodoPagoPrincipal = () => {
+    if (pagosDivision.length === 0) return metodoPago;
+    const efectivo = pagosDivision.find(p => p.metodo === "efectivo");
+    if (efectivo) return "efectivo";
+    const yape = pagosDivision.find(p => p.metodo === "yape");
+    if (yape) return "yape";
+    return "pos";
+  };
+
   const eliminarVenta = async (id: number) => {
     if (!confirm("¿Estás seguro de eliminar esta venta?")) return;
     
@@ -377,6 +410,13 @@ export default function Ventas() {
     const totalFinal = esPersonal ? 0 : (esMancoraGo ? totalConPropina - comisionMancoraGo : totalConPropina);
 
     try {
+      const metodoFinal = pagoDividido ? getMetodoPagoPrincipal() : metodoPago;
+      const montoEfectivoFinal = pagoDividido 
+        ? pagosDivision.filter(p => p.metodo === "efectivo").reduce((acc, p) => acc + p.monto, 0)
+        : (metodoPago === "efectivo" ? montoRecibido : totalFinal);
+      const totalPagosFinal = pagoDividido ? getTotalPagosDivision() : totalFinal;
+      const cambioFinal = esPersonal ? 0 : (metodoFinal === "efectivo" ? montoEfectivoFinal - totalPagosFinal : 0);
+      
       const nuevoPedido = {
       id: Date.now(),
       tipo: tipoVenta,
@@ -392,12 +432,14 @@ export default function Ventas() {
       hora,
       usuario: nombreUsuario,
       estado: "completado",
-      metodoPago: esPersonal ? "personal" : metodoPago,
-      montoRecibido: esPersonal ? 0 : (metodoPago === "efectivo" ? montoRecibido : totalFinal),
-      cambio: esPersonal ? 0 : (metodoPago === "efectivo" ? montoRecibido - totalFinal : 0),
+      metodoPago: esPersonal ? "personal" : metodoFinal,
+      montoRecibido: esPersonal ? 0 : totalPagosFinal,
+      cambio: cambioFinal,
       fechaCierre: null,
       propina: 0,
-      esPersonal: esPersonal
+      esPersonal: esPersonal,
+      pagoDividido: pagoDividido,
+      pagosDivision: pagoDividido ? pagosDivision : []
     };
       const ventasRef = doc(db, "ventas", "pedidos");
       const ventasSnap = await getDoc(ventasRef);
@@ -843,7 +885,7 @@ export default function Ventas() {
                         Registrar
                       </button>
                       <button 
-                        onClick={() => { setModalPago(true); setDescuento(0); }}
+                        onClick={() => { setModalPago(true); setDescuento(0); setPagoDividido(false); setPagosDivision([]); }}
                         className="bg-green-600 text-white py-2 rounded text-sm hover:bg-green-700"
                       >
                         Cobrar
@@ -934,6 +976,8 @@ export default function Ventas() {
                             setTomarPedido(true);
                             setModalPago(true);
                             setDescuento(0);
+                            setPagoDividido(false);
+                            setPagosDivision([]);
                           }}
                           className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
                         >
@@ -1326,26 +1370,102 @@ export default function Ventas() {
               />
             </div>
 
-            <div className="flex gap-2 mb-4">
-              <button 
-                onClick={() => setMetodoPago("efectivo")}
-                className={`flex-1 py-3 rounded ${metodoPago === "efectivo" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-              >
-                💵 Efectivo
-              </button>
-              <button 
-                onClick={() => setMetodoPago("yape")}
-                className={`flex-1 py-3 rounded ${metodoPago === "yape" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-              >
-                📱 Yape
-              </button>
-              <button 
-                onClick={() => setMetodoPago("pos")}
-                className={`flex-1 py-3 rounded ${metodoPago === "pos" ? "bg-green-600 text-white" : "bg-gray-200"}`}
-              >
-                💳 POS
-              </button>
-            </div>
+            {!pagoDividido ? (
+              <>
+                <div className="flex gap-2 mb-4">
+                  <button 
+                    onClick={() => setMetodoPago("efectivo")}
+                    className={`flex-1 py-3 rounded ${metodoPago === "efectivo" ? "bg-green-600 text-white" : "bg-gray-200"}`}
+                  >
+                    💵 Efectivo
+                  </button>
+                  <button 
+                    onClick={() => setMetodoPago("yape")}
+                    className={`flex-1 py-3 rounded ${metodoPago === "yape" ? "bg-green-600 text-white" : "bg-gray-200"}`}
+                  >
+                    📱 Yape
+                  </button>
+                  <button 
+                    onClick={() => setMetodoPago("pos")}
+                    className={`flex-1 py-3 rounded ${metodoPago === "pos" ? "bg-green-600 text-white" : "bg-gray-200"}`}
+                  >
+                    💳 POS
+                  </button>
+                </div>
+                <button
+                  onClick={() => { setPagoDividido(true); agregarPagoDivision(); }}
+                  className="w-full mb-4 py-3 bg-blue-600 text-white rounded font-bold hover:bg-blue-700"
+                >
+                  🔄 Dividir Pago
+                </button>
+              </>
+            ) : (
+              <div className="mb-4 bg-blue-50 border border-blue-200 rounded p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-bold text-blue-800">🔄 Pago Dividido</h3>
+                  <button
+                    onClick={() => { setPagoDividido(false); setPagosDivision([]); }}
+                    className="text-sm text-blue-600 underline"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <p className="text-sm text-blue-600 mb-3">Total a pagar: <strong>S/.{getTotalConPropina().toFixed(2)}</strong></p>
+                
+                {pagosDivision.map((pago, index) => (
+                  <div key={index} className="flex gap-2 mb-2 items-center">
+                    <select
+                      value={pago.metodo}
+                      onChange={(e) => actualizarPagoDivision(index, "metodo", e.target.value)}
+                      className="border p-2 rounded text-sm flex-1"
+                    >
+                      <option value="efectivo">💵 Efectivo</option>
+                      <option value="yape">📱 Yape</option>
+                      <option value="pos">💳 POS</option>
+                    </select>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Monto"
+                      className="border p-2 rounded text-sm w-28 text-right"
+                      value={pago.monto || ""}
+                      onChange={(e) => actualizarPagoDivision(index, "monto", e.target.value)}
+                    />
+                    {pagosDivision.length > 1 && (
+                      <button
+                        onClick={() => eliminarPagoDivision(index)}
+                        className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                <button
+                  onClick={agregarPagoDivision}
+                  className="w-full mt-2 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                >
+                  + Agregar otro pago
+                </button>
+                
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <div className="flex justify-between font-bold">
+                    <span>Pagado:</span>
+                    <span className={getTotalPagosDivision() >= getTotalConPropina() ? "text-green-600" : "text-red-600"}>
+                      S/.{getTotalPagosDivision().toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold">
+                    <span>Falta:</span>
+                    <span className={getTotalConPropina() - getTotalPagosDivision() <= 0 ? "text-green-600" : "text-red-600"}>
+                      S/.{Math.max(0, getTotalConPropina() - getTotalPagosDivision()).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded p-3">
               <label className="block text-gray-700 font-bold mb-1">🍽 Propina:</label>
@@ -1364,7 +1484,7 @@ export default function Ventas() {
               const totalConComision = mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina();
               return (
                 <>
-                  {metodoPago === "efectivo" && (
+                  {metodoPago === "efectivo" && !pagoDividido && (
                     <div className="mb-4">
                       <label className="block text-gray-700 font-bold mb-1">Monto que paga el cliente:</label>
                       <input 
@@ -1397,7 +1517,7 @@ export default function Ventas() {
                     </div>
                   )}
 
-                  {metodoPago !== "efectivo" && (
+                  {metodoPago !== "efectivo" && !pagoDividido && (
                     <div className="mb-4 bg-blue-50 p-3 rounded">
                       <p className="text-gray-700">Subtotal: <span className="font-bold">S/.{getTotal().toFixed(2)}</span></p>
                       {descuento > 0 && (
@@ -1412,21 +1532,63 @@ export default function Ventas() {
                       <p className="text-gray-700 font-bold border-t pt-1 mt-1">Total a pagar: S/.{totalConComision.toFixed(2)}</p>
                     </div>
                   )}
+
+                  {pagoDividido && (
+                    <div className="mb-4 bg-green-50 p-3 rounded">
+                      <p className="font-bold text-green-800 mb-2">Resumen del Pago Dividido:</p>
+                      {pagosDivision.map((pago, idx) => (
+                        <div key={idx} className="flex justify-between text-sm py-1">
+                          <span>
+                            {pago.metodo === "efectivo" ? "💵 Efectivo" : pago.metodo === "yape" ? "📱 Yape" : "💳 POS"}:
+                          </span>
+                          <span className="font-bold">S/.{pago.monto.toFixed(2)}</span>
+                        </div>
+                      ))}
+                      <div className="border-t border-green-300 pt-2 mt-2">
+                        <div className="flex justify-between font-bold">
+                          <span>Total Pagado:</span>
+                          <span className="text-green-600">S/.{getTotalPagosDivision().toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between font-bold">
+                          <span>Total a Pagar:</span>
+                          <span>S/.{getTotalConPropina().toFixed(2)}</span>
+                        </div>
+                        {getTotalPagosDivision() > getTotalConPropina() && (
+                          <div className="flex justify-between font-bold text-green-600">
+                            <span>Cambio:</span>
+                            <span>S/.{(getTotalPagosDivision() - getTotalConPropina()).toFixed(2)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               );
             })()}
 
             <div className="flex gap-2 mt-4">
               <button 
-                onClick={() => { setModalPago(false); setMontoRecibido(0); setPropina(0); setDescuento(0); }}
+                onClick={() => { setModalPago(false); setMontoRecibido(0); setPropina(0); setDescuento(0); setPagoDividido(false); setPagosDivision([]); }}
                 className="flex-1 bg-gray-300 text-gray-700 py-2 rounded hover:bg-gray-400"
               >
                 Cancelar
               </button>
               <button 
                 onClick={guardarPedido}
-                disabled={guardandoPedido || (metodoPago === "efectivo" && montoRecibido < (mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina()))}
-                className={`flex-1 py-2 rounded flex items-center justify-center gap-2 ${guardandoPedido || (metodoPago === "efectivo" && montoRecibido < (mesaSeleccionada === "Máncora Go!" ? getTotalConPropina() - getTotal() * 0.10 : getTotalConPropina())) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700"}`}
+                disabled={
+                  guardandoPedido || 
+                  (pagoDividido 
+                    ? getTotalPagosDivision() < getTotalConPropina() 
+                    : (metodoPago === "efectivo" && montoRecibido < getTotalConPropina())
+                  )
+                }
+                className={`flex-1 py-2 rounded flex items-center justify-center gap-2 ${
+                  guardandoPedido || 
+                  (pagoDividido 
+                    ? getTotalPagosDivision() < getTotalConPropina() 
+                    : (metodoPago === "efectivo" && montoRecibido < getTotalConPropina())
+                  ) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 text-white hover:bg-green-700"
+                }`}
               >
                 {guardandoPedido ? "Guardando..." : "Confirmar Pago"}
               </button>
