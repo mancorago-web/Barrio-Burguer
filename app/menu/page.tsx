@@ -64,9 +64,11 @@ export default function Menu() {
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src="/icons/icon-192x192.png" alt="Barrio Burger" className="w-10 h-10 md:w-12 md:h-12" />
-            <h1 className="text-lg md:text-2xl font-bold text-blue-900">
-              Barrio Burger
-            </h1>
+            <span className="bg-white px-3 py-1 rounded-lg shadow">
+              <h1 className="text-lg md:text-2xl font-bold text-blue-900">
+                Barrio Burger
+              </h1>
+            </span>
           </div>
           <button 
             onClick={cerrarSesion}
