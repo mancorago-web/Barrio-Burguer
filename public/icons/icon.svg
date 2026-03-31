@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#ea580c"/>
+  <circle cx="256" cy="200" r="120" fill="#fef3c7"/>
+  <ellipse cx="256" cy="200" rx="100" ry="30" fill="#d97706"/>
+  <rect x="156" y="180" width="200" height="40" rx="10" fill="#92400e"/>
+  <circle cx="200" cy="200" r="8" fill="#fef3c7"/>
+  <circle cx="312" cy="200" r="8" fill="#fef3c7"/>
+  <rect x="120" y="230" width="272" height="30" rx="8" fill="#fcd34d"/>
+  <rect x="140" y="260" width="232" height="25" rx="6" fill="#f59e0b"/>
+  <rect x="130" y="285" width="252" height="20" rx="5" fill="#92400e"/>
+  <ellipse cx="256" cy="310" rx="130" ry="35" fill="#fef3c7"/>
+  <rect x="166" y="295" width="180" height="30" rx="8" fill="#dc2626"/>
+  <ellipse cx="256" cy="310" rx="110" ry="20" fill="#fbbf24"/>
+  <text x="256" y="400" font-family="Arial Black, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">BB</text>
+</svg>
