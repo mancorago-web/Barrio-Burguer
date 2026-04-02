@@ -499,6 +499,29 @@ export default function Caja() {
     setNuevaCompraPrecio(0);
   };
 
+  const eliminarCompra = async (compraId: number) => {
+    if (!confirm("¿Estás seguro de eliminar esta compra? Quedará registrada con marca de eliminación.")) return;
+    
+    const comprasActualizadas = compras.map((c: any) => {
+      if (c.id === compraId) {
+        return { ...c, eliminado: true, fechaEliminacion: new Date().toISOString() };
+      }
+      return c;
+    });
+    
+    setCompras(comprasActualizadas);
+    
+    try {
+      await setDoc(doc(db, "compras", "registros"), {
+        compras: comprasActualizadas
+      });
+      setNotificacion("Compra eliminada (queda en historial)");
+      setTimeout(() => setNotificacion(null), 3000);
+    } catch (error) {
+      console.error("Error eliminando compra:", error);
+    }
+  };
+
   const guardarMontoInicial = async () => {
     const ahora = new Date();
     const fecha = ahora.toISOString().split("T")[0];
@@ -1126,7 +1149,7 @@ export default function Caja() {
                   {(() => {
                     const comprasFiltradas = [...compras.filter(c => c.fecha === fechaFiltroCompras)]
                       .sort((a, b) => b.hora.localeCompare(a.hora));
-                    const totalDia = comprasFiltradas.reduce((acc, c) => acc + (c.total || 0), 0);
+                    const totalDia = comprasFiltradas.filter(c => !c.eliminado).reduce((acc, c) => acc + (c.total || 0), 0);
                     
                     return (
                       <>
@@ -1147,16 +1170,28 @@ export default function Caja() {
                                   <th className="p-2 text-right hidden sm:table-cell">Unit.</th>
                                   <th className="p-2 text-right">Total</th>
                                   <th className="p-2 text-left hidden md:table-cell">Hora</th>
+                                  <th className="p-2 text-center">✕</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {comprasFiltradas.map((c, idx) => (
-                                  <tr key={idx} className="border-b">
+                                  <tr key={idx} className={`border-b ${c.eliminado ? "bg-gray-200 opacity-50" : ""}`}>
                                     <td className="p-2">{c.productoNombre || c.producto || "-"}</td>
                                     <td className="p-2 text-right">{c.cantidad || 0}</td>
                                     <td className="p-2 text-right hidden sm:table-cell">S/.{(c.precioUnitario || 0).toFixed(2)}</td>
                                     <td className="p-2 text-right font-bold">S/.{(c.total || 0).toFixed(2)}</td>
                                     <td className="p-2 hidden md:table-cell">{c.hora || "-"}</td>
+                                    {!c.eliminado && (
+                                      <td className="p-2">
+                                        <button
+                                          onClick={() => eliminarCompra(c.id)}
+                                          className="text-red-500 hover:text-red-700 font-bold text-lg"
+                                          title="Eliminar compra"
+                                        >
+                                          ✕
+                                        </button>
+                                      </td>
+                                    )}
                                   </tr>
                                 ))}
                               </tbody>
